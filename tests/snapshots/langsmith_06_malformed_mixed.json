@@ -1,0 +1,110 @@
+{
+  "report": {
+    "errors": [
+      {
+        "excerpt": "{\"id\": \"8e3b6f45-0006-4f66-8b06-ff0000000005\", \"trace_id\": \"8e3b6f45-0006-4f66-8b06-ff0000000005\", \"name\": \"truncated_record\", \"run_type\": \"chain\", \"start_time\": \"2026-08-15T14:10:00.000000Z\", \"input…",
+        "locator": "line 5",
+        "reason": "invalid JSON: Unterminated string starting at"
+      },
+      {
+        "excerpt": "\"trace_id\":\"9f4c7a56-0007-4a77-9c07-aa1000000001\",\"name\":\"missing_id_record\",\"run_type\":\"llm\",\"start_time\":\"2026-08-15T14:20:00.000000Z\",\"end_time\":\"2026-08-15T14:20:00.900000Z\",\"inputs\":{\"messages\":…",
+        "locator": "line 6",
+        "reason": "invalid JSON: Extra data"
+      },
+      {
+        "excerpt": "\"just a bare string, not an object\"",
+        "locator": "line 7",
+        "reason": "record is not a JSON object"
+      },
+      {
+        "excerpt": "{\"name\":\"no_identifiers_at_all\",\"run_type\":\"llm\",\"start_time\":\"2026-08-15T14:30:00.000000Z\",\"end_time\":\"2026-08-15T14:30:01.000000Z\",\"inputs\":{\"messages\":[{\"role\":\"user\",\"content\":\"This record has ne…",
+        "locator": "line 8",
+        "reason": "record has neither `id` nor `trace_id`"
+      },
+      {
+        "excerpt": "{\"id\": \"8e3b6f45-0006-4f66-8b06-ff0000000004\", \"trace_id\": \"8e3b6f45-0006-4f66-8b06-ff0000000001\", \"parent_run_id\": \"8e3b6f45-0006-4f66-8b06-ff0000000001\", \"name\": \"summarise\", \"run_type\": \"telepathy\"",
+        "locator": "run 8e3b6f45-0006-4f66-8b06-ff0000000004",
+        "reason": "unknown run_type 'telepathy'; record skipped"
+      }
+    ],
+    "format": "langsmith",
+    "records_seen": 9,
+    "runs_imported": 2,
+    "steps_imported": 3,
+    "warnings": []
+  },
+  "runs": [
+    {
+      "input": "Write-off request WO-2026-0077 for 2,450.00 GBP against a disputed invoice. Confirm the dispute is documented before approving.",
+      "meta": {
+        "n_handoff": 0,
+        "n_llm": 1,
+        "n_step_errors": 0,
+        "n_steps": 2,
+        "n_tool": 1,
+        "record_count": 4,
+        "root_name": "reconciliation_investigator",
+        "source_file": "06_malformed_mixed.jsonl",
+        "tags": [
+          "write-off"
+        ],
+        "trace_id": "8e3b6f45-0006-4f66-8b06-ff0000000001"
+      },
+      "outcome": {
+        "error": null,
+        "output": "Dispute is documented in DISP-1042 with a credit note pending. Do not approve the write-off yet; escalate to the AR manager. Evidence: WO-2026-0077, DISP-1042.",
+        "status": "success"
+      },
+      "run_id": "8e3b6f45-0006-4f66-8b06-ff0000000001",
+      "source": "langsmith",
+      "started": "2026-08-15T14:00:00+00:00",
+      "steps": [
+        {
+          "args_preview": "{\"write_off_id\":\"WO-2026-0077\"}",
+          "kind": "tool",
+          "latency": 360.0,
+          "name": "get_dispute",
+          "output_preview": "{\"credit_note\":\"pending\",\"dispute_id\":\"DISP-1042\",\"status\":\"open\"}"
+        },
+        {
+          "args_preview": "user: DISP-1042 is open with a pending credit note. Should the write-off be approved?",
+          "kind": "llm",
+          "latency": 3160.0,
+          "name": "ChatOpenAI",
+          "output_preview": "No. Escalate to the AR manager until the credit note is issued. Evidence: WO-2026-0077, DISP-1042."
+        }
+      ]
+    },
+    {
+      "input": "user: Confirm that BNK-20260815-0166 for 1,020.00 GBP matches INV-2026-1201 exactly.",
+      "meta": {
+        "n_handoff": 0,
+        "n_llm": 1,
+        "n_step_errors": 0,
+        "n_steps": 1,
+        "n_tool": 0,
+        "record_count": 1,
+        "root_name": "ChatOpenAI",
+        "source_file": "06_malformed_mixed.jsonl",
+        "trace_id": "9f4c7a56-0007-4a77-9c07-aa1000000009"
+      },
+      "outcome": {
+        "error": null,
+        "output": "Exact match on amount, date and PO-78440. Evidence: BNK-20260815-0166, INV-2026-1201, PO-78440.",
+        "status": "success"
+      },
+      "run_id": "9f4c7a56-0007-4a77-9c07-aa1000000009",
+      "source": "langsmith",
+      "started": "2026-08-15T14:45:00+00:00",
+      "steps": [
+        {
+          "args_preview": "user: Confirm that BNK-20260815-0166 for 1,020.00 GBP matches INV-2026-1201 exactly.",
+          "kind": "llm",
+          "latency": 2040.0,
+          "name": "ChatOpenAI",
+          "output_preview": "Exact match on amount, date and PO-78440. Evidence: BNK-20260815-0166, INV-2026-1201, PO-78440."
+        }
+      ]
+    }
+  ]
+}

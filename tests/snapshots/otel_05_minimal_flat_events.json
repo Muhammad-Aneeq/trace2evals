@@ -1,0 +1,43 @@
+{
+  "report": {
+    "errors": [],
+    "format": "otel",
+    "records_seen": 1,
+    "runs_imported": 1,
+    "steps_imported": 1,
+    "warnings": []
+  },
+  "runs": [
+    {
+      "input": "Does BNK-20260814-0101 for 55.00 GBP need investigation, or is it below the materiality threshold of 100.00?",
+      "meta": {
+        "n_handoff": 0,
+        "n_llm": 1,
+        "n_step_errors": 0,
+        "n_steps": 1,
+        "n_tool": 0,
+        "root_span": "chat gpt-4o-mini",
+        "source_file": "05_minimal_flat_events.json",
+        "span_count": 1,
+        "trace_id": "5f6e7d8c9b0a1234f5e6d7c8b9a01234"
+      },
+      "outcome": {
+        "error": null,
+        "output": "Below the 100.00 materiality threshold; auto-write-off is appropriate. No investigation required.",
+        "status": "success"
+      },
+      "run_id": "5f6e7d8c9b0a1234f5e6d7c8b9a01234",
+      "source": "otel",
+      "started": "2026-08-14T14:15:00+00:00",
+      "steps": [
+        {
+          "args_preview": "Does BNK-20260814-0101 for 55.00 GBP need investigation, or is it below the materiality threshold of 100.00?",
+          "kind": "llm",
+          "latency": 2310.0,
+          "name": "gpt-4o-mini",
+          "output_preview": "Below the 100.00 materiality threshold; auto-write-off is appropriate. No investigation required."
+        }
+      ]
+    }
+  ]
+}

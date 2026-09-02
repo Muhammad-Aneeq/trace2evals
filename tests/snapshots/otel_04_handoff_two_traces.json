@@ -1,0 +1,106 @@
+{
+  "report": {
+    "errors": [],
+    "format": "otel",
+    "records_seen": 8,
+    "runs_imported": 2,
+    "steps_imported": 6,
+    "warnings": []
+  },
+  "runs": [
+    {
+      "input": "FX-related break: BNK-20260814-0088 settled 12,500.00 USD against an invoice denominated in EUR. Route and resolve.",
+      "meta": {
+        "n_handoff": 1,
+        "n_llm": 1,
+        "n_step_errors": 0,
+        "n_steps": 4,
+        "n_tool": 2,
+        "root_span": "invoke_agent triage_router",
+        "scope": "opentelemetry.instrumentation.langgraph",
+        "service": "exception-workbench",
+        "source_file": "04_handoff_two_traces.json",
+        "span_count": 5,
+        "trace_id": "1a2b3c4d5e6f70819a2b3c4d5e6f7081"
+      },
+      "outcome": {
+        "error": null,
+        "output": "Routed to fx_specialist. Root cause: FX revaluation difference of 214.30 EUR between invoice date and settlement date. Escalated to the treasury queue for rate confirmation. Evidence: INV-2026-1004, FX-RATE-20260814.",
+        "status": "success"
+      },
+      "run_id": "1a2b3c4d5e6f70819a2b3c4d5e6f7081",
+      "source": "otel",
+      "started": "2026-08-14T12:15:00+00:00",
+      "steps": [
+        {
+          "args_preview": "user: Classify this break and choose a specialist agent.",
+          "kind": "llm",
+          "latency": 890.0,
+          "name": "gpt-4o-mini",
+          "output_preview": "assistant: Currency mismatch. Handing off to fx_specialist."
+        },
+        {
+          "args_preview": "{\"break_id\":\"BNK-20260814-0088\",\"from_agent\":\"triage_router\",\"reason\":\"currency_mismatch\"}",
+          "kind": "handoff",
+          "latency": 7200.0,
+          "name": "fx_specialist",
+          "output_preview": "{\"delta_eur\":214.3,\"escalated_to\":\"treasury\",\"evidence\":[\"INV-2026-1004\",\"FX-RATE-20260814\"],\"root_cause\":\"fx_revaluation\"}"
+        },
+        {
+          "args_preview": "{\"date\":\"2026-08-14\",\"pair\":\"USD/EUR\"}",
+          "kind": "tool",
+          "latency": 380.0,
+          "name": "get_fx_rate",
+          "output_preview": "{\"pair\":\"USD/EUR\",\"rate\":0.9172,\"source\":\"FX-RATE-20260814\"}"
+        },
+        {
+          "args_preview": "{\"break_id\":\"BNK-20260814-0088\",\"queue\":\"treasury\",\"reason\":\"fx rate confirmation required\"}",
+          "kind": "tool",
+          "latency": 430.0,
+          "name": "flag_exception",
+          "output_preview": "{\"flagged\":true,\"ticket\":\"ESC-4471\"}"
+        }
+      ]
+    },
+    {
+      "input": "Missing reference: BNK-20260814-0093 for 780.00 GBP has an empty remittance field. Identify the counterparty.",
+      "meta": {
+        "n_handoff": 0,
+        "n_llm": 1,
+        "n_step_errors": 0,
+        "n_steps": 2,
+        "n_tool": 1,
+        "root_span": "invoke_agent reconciliation_investigator",
+        "scope": "opentelemetry.instrumentation.langgraph",
+        "service": "exception-workbench",
+        "source_file": "04_handoff_two_traces.json",
+        "span_count": 3,
+        "trace_id": "2b3c4d5e6f708192ab3c4d5e6f708192"
+      },
+      "outcome": {
+        "error": null,
+        "output": "Counterparty is CP-2210 (Halden Print Services), matched on the sort-code/account pair. Evidence: BNK-20260814-0093, CP-2210.",
+        "status": "success"
+      },
+      "run_id": "2b3c4d5e6f708192ab3c4d5e6f708192",
+      "source": "otel",
+      "started": "2026-08-14T13:15:00+00:00",
+      "steps": [
+        {
+          "args_preview": "{\"account_last4\":\"8842\",\"sort_code\":\"20-45-11\"}",
+          "kind": "tool",
+          "latency": 350.0,
+          "name": "search_counterparty",
+          "output_preview": "{\"confidence\":0.94,\"counterparty_id\":\"CP-2210\",\"name\":\"Halden Print Services\"}"
+        },
+        {
+          "args_preview": "user: Counterparty match returned CP-2210 at 0.94 confidence. Conclude.",
+          "kind": "llm",
+          "latency": 2930.0,
+          "name": "gpt-4o-mini",
+          "output_preview": "assistant: Counterparty is CP-2210 (Halden Print Services), matched on the sort-code/account pair. Evidence: BNK-20260814-0093, CP-2210."
+        }
+      ]
+    }
+  ]
+}

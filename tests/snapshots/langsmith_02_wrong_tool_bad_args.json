@@ -1,0 +1,69 @@
+{
+  "report": {
+    "errors": [],
+    "format": "langsmith",
+    "records_seen": 5,
+    "runs_imported": 1,
+    "steps_imported": 4,
+    "warnings": []
+  },
+  "runs": [
+    {
+      "input": "Invoice INV-2026-1140 (8,900.00 USD) shows as unpaid but the supplier claims payment on 2026-08-03. Verify against the bank feed.",
+      "meta": {
+        "n_handoff": 0,
+        "n_llm": 2,
+        "n_step_errors": 0,
+        "n_steps": 4,
+        "n_tool": 2,
+        "record_count": 5,
+        "root_name": "reconciliation_investigator",
+        "session": "s-2026-08-week33",
+        "source_file": "02_wrong_tool_bad_args.jsonl",
+        "tags": [
+          "reconciliation",
+          "v0.3.1"
+        ],
+        "trace_id": "4a9d2b01-0002-4b22-8d02-bb0000000001"
+      },
+      "outcome": {
+        "error": null,
+        "output": "I could not locate a matching bank transaction, so the invoice remains unpaid. The supplier is likely mistaken.",
+        "status": "success"
+      },
+      "run_id": "4a9d2b01-0002-4b22-8d02-bb0000000001",
+      "source": "langsmith",
+      "started": "2026-08-15T09:20:00+00:00",
+      "steps": [
+        {
+          "args_preview": "user: Supplier claims INV-2026-1140 was paid on 2026-08-03. Verify against the bank feed.",
+          "kind": "llm",
+          "latency": 1420.0,
+          "name": "ChatOpenAI",
+          "output_preview": "I will search the GL for the invoice."
+        },
+        {
+          "args_preview": "{\"invoice_id\":\"INV-2026-1140\",\"period\":\"2026-08\"}",
+          "kind": "tool",
+          "latency": 280.0,
+          "name": "get_gl_entries",
+          "output_preview": "[]"
+        },
+        {
+          "args_preview": "{\"amount\":8900,\"date_from\":\"2026-08-03\",\"date_to\":\"2026-08-03\"}",
+          "kind": "tool",
+          "latency": 310.0,
+          "name": "get_bank_transactions",
+          "output_preview": "[]"
+        },
+        {
+          "args_preview": "user: Both lookups returned nothing. Conclude.",
+          "kind": "llm",
+          "latency": 4930.0,
+          "name": "ChatOpenAI",
+          "output_preview": "I could not locate a matching bank transaction, so the invoice remains unpaid. The supplier is likely mistaken."
+        }
+      ]
+    }
+  ]
+}

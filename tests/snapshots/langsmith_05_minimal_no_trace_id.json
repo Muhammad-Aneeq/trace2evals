@@ -1,0 +1,87 @@
+{
+  "report": {
+    "errors": [],
+    "format": "langsmith",
+    "records_seen": 4,
+    "runs_imported": 2,
+    "steps_imported": 3,
+    "warnings": []
+  },
+  "runs": [
+    {
+      "input": "user: Is a 3.00 GBP variance on BNK-20260815-0140 worth investigating given a 100.00 materiality threshold?",
+      "meta": {
+        "n_handoff": 0,
+        "n_llm": 1,
+        "n_step_errors": 0,
+        "n_steps": 1,
+        "n_tool": 0,
+        "record_count": 1,
+        "root_name": "ChatOpenAI",
+        "source_file": "05_minimal_no_trace_id.jsonl",
+        "tags": [
+          "materiality"
+        ],
+        "trace_id": "7d2a5e34-0005-4e55-9a05-ee0000000001"
+      },
+      "outcome": {
+        "error": null,
+        "output": "No. 3.00 GBP is far below the 100.00 threshold; write off to the rounding account.",
+        "status": "success"
+      },
+      "run_id": "7d2a5e34-0005-4e55-9a05-ee0000000001",
+      "source": "langsmith",
+      "started": "2026-08-15T12:05:00+00:00",
+      "steps": [
+        {
+          "args_preview": "user: Is a 3.00 GBP variance on BNK-20260815-0140 worth investigating given a 100.00 materiality threshold?",
+          "kind": "llm",
+          "latency": 1480.0,
+          "name": "ChatOpenAI",
+          "output_preview": "No. 3.00 GBP is far below the 100.00 threshold; write off to the rounding account."
+        }
+      ]
+    },
+    {
+      "input": "BNK-20260815-0151 for 640.00 GBP has remittance text 'INV 1180 PARTIAL'. Which invoice, and is the residual expected?",
+      "meta": {
+        "n_handoff": 0,
+        "n_llm": 1,
+        "n_step_errors": 0,
+        "n_steps": 2,
+        "n_tool": 1,
+        "record_count": 3,
+        "root_name": "reconciliation_investigator",
+        "source_file": "05_minimal_no_trace_id.jsonl",
+        "tags": [
+          "reconciliation"
+        ],
+        "trace_id": "7d2a5e34-0005-4e55-9a05-ee0000000002"
+      },
+      "outcome": {
+        "error": null,
+        "output": "Refers to INV-2026-1180 (gross 1,600.00). This is the second of three agreed instalments; residual 320.00 remains and is expected. Evidence: INV-2026-1180, SCHED-2044.",
+        "status": "success"
+      },
+      "run_id": "7d2a5e34-0005-4e55-9a05-ee0000000002",
+      "source": "langsmith",
+      "started": "2026-08-15T12:40:00+00:00",
+      "steps": [
+        {
+          "args_preview": "{\"invoice_id\":\"INV-2026-1180\"}",
+          "kind": "tool",
+          "latency": 370.0,
+          "name": "get_invoice",
+          "output_preview": "{\"gross\":1600.0,\"instalment_schedule\":\"SCHED-2044\",\"invoice_id\":\"INV-2026-1180\",\"paid_to_date\":640.0}"
+        },
+        {
+          "args_preview": "user: INV-2026-1180 gross 1600.00, paid_to_date 640.00, schedule SCHED-2044. Conclude on the residual.",
+          "kind": "llm",
+          "latency": 3460.0,
+          "name": "ChatOpenAI",
+          "output_preview": "Second of three agreed instalments; residual 320.00 is expected. Evidence: INV-2026-1180, SCHED-2044."
+        }
+      ]
+    }
+  ]
+}

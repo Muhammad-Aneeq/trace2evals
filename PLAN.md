@@ -178,20 +178,22 @@ Acceptance criteria quoted from spec:
 > Parser fixtures: **6 real-shaped sample files per format incl. malformed records; snapshot-tested
 > normalization** (spec 03 sec 10)
 
-- [ ] `schemas.py`: `Step`, `TraceRun`, `ParseReport`, `RecordError` - field names exactly as F2
-- [ ] `models.py` + `store.py`: tables `runs, steps, labels, cases, export_versions` exactly as spec 03 sec 6
-- [ ] `parsers/base.py`: `ParseReport` accumulation; a bad record never aborts the file
-- [ ] `parsers/otel.py`: resourceSpans/scopeSpans/spans walk; `gen_ai.*` attrs -> llm steps;
+- [x] `schemas.py`: `Step`, `TraceRun`, `ParseReport`, `RecordError` - field names exactly as F2
+- [x] `models.py` + `store.py`: tables `runs, steps, labels, cases, export_versions` exactly as spec 03 sec 6
+- [x] `parsers/base.py`: `ParseReport` accumulation; a bad record never aborts the file
+- [x] `parsers/otel.py`: resourceSpans/scopeSpans/spans walk; `gen_ai.*` attrs -> llm steps;
       tool spans -> tool steps; span links/parent -> handoff; nanosecond timestamps -> latency ms
-- [ ] `parsers/langsmith.py`: JSONL run records; `run_type` (llm/tool/chain) -> kind; nested inputs/outputs;
+- [x] `parsers/langsmith.py`: JSONL run records; `run_type` (llm/tool/chain) -> kind; nested inputs/outputs;
       `error` field preserved
-- [ ] `parsers/__init__.py`: sniff format by extension + shape, explicit `--format` override
-- [ ] `normalizer.py`: group spans into runs by trace_id/root, order steps, truncate previews, derive outcome
-- [ ] Redaction hook wired at the import call site (pass-through in Phase 1; implemented Phase 4) - see D-003
-- [ ] 6 OTel fixtures + 6 LangSmith fixtures (synthetic, marked) incl. one malformed each
-- [ ] `fixtures/README.md` provenance note
-- [ ] Tests: parser snapshots both formats, malformed-record handling, normalizer unit tests, store tests
-- [ ] Commit: "Phase 1: importers, normalizer, store, fixtures"
+- [x] `parsers/__init__.py`: sniff format by extension + shape, explicit `--format` override
+- [x] `normalizer.py`: group spans into runs by trace_id/root, order steps, truncate previews, derive outcome
+- [x] Redaction implemented in full and wired at the import call site - moved earlier, see D-011
+- [x] 6 OTel fixtures + 6 LangSmith fixtures (synthetic, marked) incl. one malformed each
+- [x] `fixtures/README.md` provenance note
+- [x] Tests: parser snapshots both formats, malformed-record handling, normalizer unit tests, store tests
+- [x] `ingest.py` pipeline (parse -> redact -> normalize -> store) shared by CLI and API - see D-012
+- [x] `docs/importers.md`: accepted shapes, GenAI alias tables, classification order, error semantics
+- [x] Commit: "Phase 1: importers, normalizer, store, fixtures"
 
 **Test plan:** `test_parsers_otel.py` / `test_parsers_langsmith.py` snapshot every fixture's normalized
 output to `tests/snapshots/`; malformed fixtures assert `report.errors` is non-empty AND the good records
@@ -359,6 +361,21 @@ Append-only. Every deviation from spec or judgment call, with one line of reason
 - **D-008** Generated `test_cases.py` imports helpers from `t2e.assertions` rather than inlining them ->
   one implementation tested once; the stub stays readable. A `--standalone` inline variant is noted as
   future work, not v1 scope.
+- **D-009** Added three columns beyond spec 03 sec 6's list: `runs.started`, `runs.duration_ms`,
+  `runs.has_error` -> F3 requires filtering the run list by source, has-error and duration, which is not
+  answerable from the specced columns without parsing JSON text in SQL.
+- **D-010** Added `labels.seconds_spent` -> spec 03 sec 9 requires a *measured* median seconds per label;
+  without persisting the per-label elapsed time the stat could only ever be a guess.
+- **D-011** Redaction was implemented in full in Phase 1 rather than stubbed and completed in Phase 4,
+  amending D-003 -> it is ~150 lines and belongs *before* normalization so previews are derived from
+  already-redacted payloads. A stub would have been rewritten, and a secret could have leaked into a
+  preview in the meantime. Phase 4 still owns the PII banner in the UI, the dogfood and the README.
+- **D-012** The import pipeline lives in `ingest.py`, not in `parsers/__init__.py` as the file map first
+  had it -> keeps `t2e.parsers` a pure registry of format readers and gives the CLI and the API one
+  shared definition of "import this file".
+- **D-013** SQLite drops `tzinfo`, so datetime columns use a `UtcDateTime` type decorator that stores
+  naive UTC and returns UTC-aware -> without it a run reloaded from disk compares unequal to the one
+  written, which broke a round-trip test and would have corrupted exported timestamps.
 
 ---
 

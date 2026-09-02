@@ -1,0 +1,118 @@
+{
+  "_comment": "Deliberately damaged export: valid traces sit alongside broken records so the importer's strict-but-forgiving contract can be tested. See fixtures/README.md.",
+  "resourceSpans": [
+    {
+      "resource": {
+        "attributes": [{ "key": "service.name", "value": { "stringValue": "exception-workbench" } }]
+      },
+      "scopeSpans": [
+        {
+          "scope": { "name": "opentelemetry.instrumentation.langgraph" },
+          "spans": [
+            {
+              "traceId": "aaaa1111bbbb2222cccc3333dddd4444",
+              "spanId": "1010202030304040",
+              "parentSpanId": "",
+              "name": "invoke_agent reconciliation_investigator",
+              "kind": 1,
+              "startTimeUnixNano": "1786720500000000000",
+              "endTimeUnixNano": "1786720502840000000",
+              "attributes": [
+                { "key": "gen_ai.operation.name", "value": { "stringValue": "invoke_agent" } },
+                { "key": "gen_ai.agent.name", "value": { "stringValue": "reconciliation_investigator" } },
+                {
+                  "key": "input.value",
+                  "value": {
+                    "stringValue": "Unapplied credit note CN-2026-0042 for 310.00 GBP. Determine which invoice it should offset."
+                  }
+                },
+                {
+                  "key": "output.value",
+                  "value": {
+                    "stringValue": "CN-2026-0042 offsets INV-2026-0776 (same PO-76550, same counterparty CP-1180). Evidence: CN-2026-0042, INV-2026-0776, PO-76550."
+                  }
+                }
+              ],
+              "status": { "code": 1 }
+            },
+            {
+              "traceId": "aaaa1111bbbb2222cccc3333dddd4444",
+              "spanId": "2020303040405050",
+              "parentSpanId": "1010202030304040",
+              "name": "execute_tool get_invoice",
+              "kind": 1,
+              "startTimeUnixNano": "1786720500190000000",
+              "endTimeUnixNano": "1786720500520000000",
+              "attributes": [
+                { "key": "gen_ai.operation.name", "value": { "stringValue": "execute_tool" } },
+                { "key": "gen_ai.tool.name", "value": { "stringValue": "get_invoice" } },
+                { "key": "gen_ai.tool.call.arguments", "value": { "stringValue": "{\"po\":\"PO-76550\"}" } },
+                {
+                  "key": "gen_ai.tool.call.result",
+                  "value": { "stringValue": "{\"invoice_id\":\"INV-2026-0776\",\"gross\":310.00,\"counterparty_id\":\"CP-1180\"}" }
+                }
+              ],
+              "status": { "code": 1 }
+            }
+          ]
+        }
+      ]
+    },
+    "this resourceSpans entry should have been an object, not a string",
+    {
+      "resource": {
+        "attributes": [{ "key": "service.name", "value": { "stringValue": "exception-workbench" } }]
+      }
+    },
+    {
+      "resource": { "attributes": [] },
+      "scopeSpans": [
+        12345,
+        {
+          "scope": { "name": "opentelemetry.instrumentation.langgraph" },
+          "spans": [
+            null,
+            {
+              "traceId": "eeee5555ffff6666aaaa7777bbbb8888",
+              "spanId": "3030404050506060",
+              "parentSpanId": "",
+              "name": "chat gpt-4o-mini",
+              "kind": 3,
+              "startTimeUnixNano": "not-a-timestamp",
+              "endTimeUnixNano": "",
+              "attributes": [
+                { "key": "gen_ai.operation.name", "value": { "stringValue": "chat" } },
+                { "key": "gen_ai.request.model", "value": { "stringValue": "gpt-4o-mini" } },
+                {
+                  "key": "gen_ai.prompt",
+                  "value": {
+                    "stringValue": "[{\"role\":\"user\",\"content\":\"Write off BNK-20260814-0110 for 12.40 GBP?\"}]"
+                  }
+                },
+                {
+                  "key": "gen_ai.completion",
+                  "value": { "stringValue": "[{\"role\":\"assistant\",\"content\":\"Yes - immaterial, auto write-off.\"}]" }
+                }
+              ],
+              "status": { "code": 1 }
+            },
+            {
+              "traceId": "cccc9999dddd0000eeee1111ffff2222",
+              "spanId": "4040505060607070",
+              "parentSpanId": "",
+              "name": "http.request POST /internal/metrics",
+              "kind": 3,
+              "startTimeUnixNano": "1786720800000000000",
+              "endTimeUnixNano": "1786720800120000000",
+              "attributes": [
+                { "key": "http.request.method", "value": { "stringValue": "POST" } },
+                { "key": "http.response.status_code", "value": { "intValue": "204" } }
+              ],
+              "status": { "code": 1 }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

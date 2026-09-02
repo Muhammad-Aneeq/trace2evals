@@ -1,0 +1,230 @@
+{
+  "resourceSpans": [
+    {
+      "resource": {
+        "attributes": [{ "key": "service.name", "value": { "stringValue": "exception-workbench" } }]
+      },
+      "scopeSpans": [
+        {
+          "scope": { "name": "opentelemetry.instrumentation.langgraph", "version": "0.21.0" },
+          "spans": [
+            {
+              "traceId": "1a2b3c4d5e6f70819a2b3c4d5e6f7081",
+              "spanId": "f0e1d2c3b4a59687",
+              "parentSpanId": "",
+              "name": "invoke_agent triage_router",
+              "kind": 1,
+              "startTimeUnixNano": "1786709700000000000",
+              "endTimeUnixNano": "1786709708340000000",
+              "attributes": [
+                { "key": "gen_ai.operation.name", "value": { "stringValue": "invoke_agent" } },
+                { "key": "gen_ai.agent.name", "value": { "stringValue": "triage_router" } },
+                {
+                  "key": "input.value",
+                  "value": {
+                    "stringValue": "FX-related break: BNK-20260814-0088 settled 12,500.00 USD against an invoice denominated in EUR. Route and resolve."
+                  }
+                },
+                {
+                  "key": "output.value",
+                  "value": {
+                    "stringValue": "Routed to fx_specialist. Root cause: FX revaluation difference of 214.30 EUR between invoice date and settlement date. Escalated to the treasury queue for rate confirmation. Evidence: INV-2026-1004, FX-RATE-20260814."
+                  }
+                }
+              ],
+              "status": { "code": 1 }
+            },
+            {
+              "traceId": "1a2b3c4d5e6f70819a2b3c4d5e6f7081",
+              "spanId": "e1d2c3b4a5968778",
+              "parentSpanId": "f0e1d2c3b4a59687",
+              "name": "chat gpt-4o-mini",
+              "kind": 3,
+              "startTimeUnixNano": "1786709700130000000",
+              "endTimeUnixNano": "1786709701020000000",
+              "attributes": [
+                { "key": "gen_ai.operation.name", "value": { "stringValue": "chat" } },
+                { "key": "gen_ai.request.model", "value": { "stringValue": "gpt-4o-mini" } },
+                { "key": "gen_ai.usage.input_tokens", "value": { "intValue": "412" } },
+                { "key": "gen_ai.usage.output_tokens", "value": { "intValue": "44" } },
+                {
+                  "key": "gen_ai.prompt",
+                  "value": {
+                    "stringValue": "[{\"role\":\"user\",\"content\":\"Classify this break and choose a specialist agent.\"}]"
+                  }
+                },
+                {
+                  "key": "gen_ai.completion",
+                  "value": {
+                    "stringValue": "[{\"role\":\"assistant\",\"content\":\"Currency mismatch. Handing off to fx_specialist.\"}]"
+                  }
+                }
+              ],
+              "status": { "code": 1 }
+            },
+            {
+              "traceId": "1a2b3c4d5e6f70819a2b3c4d5e6f7081",
+              "spanId": "d2c3b4a596877869",
+              "parentSpanId": "f0e1d2c3b4a59687",
+              "name": "invoke_agent fx_specialist",
+              "kind": 1,
+              "startTimeUnixNano": "1786709701080000000",
+              "endTimeUnixNano": "1786709708280000000",
+              "attributes": [
+                { "key": "gen_ai.operation.name", "value": { "stringValue": "invoke_agent" } },
+                { "key": "gen_ai.agent.name", "value": { "stringValue": "fx_specialist" } },
+                {
+                  "key": "input.value",
+                  "value": {
+                    "stringValue": "{\"break_id\":\"BNK-20260814-0088\",\"reason\":\"currency_mismatch\",\"from_agent\":\"triage_router\"}"
+                  }
+                },
+                {
+                  "key": "output.value",
+                  "value": {
+                    "stringValue": "{\"root_cause\":\"fx_revaluation\",\"delta_eur\":214.30,\"escalated_to\":\"treasury\",\"evidence\":[\"INV-2026-1004\",\"FX-RATE-20260814\"]}"
+                  }
+                }
+              ],
+              "status": { "code": 1 }
+            },
+            {
+              "traceId": "1a2b3c4d5e6f70819a2b3c4d5e6f7081",
+              "spanId": "c3b4a59687786950",
+              "parentSpanId": "d2c3b4a596877869",
+              "name": "execute_tool get_fx_rate",
+              "kind": 1,
+              "startTimeUnixNano": "1786709701140000000",
+              "endTimeUnixNano": "1786709701520000000",
+              "attributes": [
+                { "key": "gen_ai.operation.name", "value": { "stringValue": "execute_tool" } },
+                { "key": "gen_ai.tool.name", "value": { "stringValue": "get_fx_rate" } },
+                {
+                  "key": "gen_ai.tool.call.arguments",
+                  "value": { "stringValue": "{\"pair\":\"USD/EUR\",\"date\":\"2026-08-14\"}" }
+                },
+                {
+                  "key": "gen_ai.tool.call.result",
+                  "value": { "stringValue": "{\"pair\":\"USD/EUR\",\"rate\":0.9172,\"source\":\"FX-RATE-20260814\"}" }
+                }
+              ],
+              "status": { "code": 1 }
+            },
+            {
+              "traceId": "1a2b3c4d5e6f70819a2b3c4d5e6f7081",
+              "spanId": "b4a5968778695041",
+              "parentSpanId": "d2c3b4a596877869",
+              "name": "execute_tool flag_exception",
+              "kind": 1,
+              "startTimeUnixNano": "1786709701580000000",
+              "endTimeUnixNano": "1786709702010000000",
+              "attributes": [
+                { "key": "gen_ai.operation.name", "value": { "stringValue": "execute_tool" } },
+                { "key": "gen_ai.tool.name", "value": { "stringValue": "flag_exception" } },
+                {
+                  "key": "gen_ai.tool.call.arguments",
+                  "value": {
+                    "stringValue": "{\"break_id\":\"BNK-20260814-0088\",\"queue\":\"treasury\",\"reason\":\"fx rate confirmation required\"}"
+                  }
+                },
+                {
+                  "key": "gen_ai.tool.call.result",
+                  "value": { "stringValue": "{\"flagged\":true,\"ticket\":\"ESC-4471\"}" }
+                }
+              ],
+              "status": { "code": 1 }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "resource": {
+        "attributes": [{ "key": "service.name", "value": { "stringValue": "exception-workbench" } }]
+      },
+      "scopeSpans": [
+        {
+          "scope": { "name": "opentelemetry.instrumentation.langgraph", "version": "0.21.0" },
+          "spans": [
+            {
+              "traceId": "2b3c4d5e6f708192ab3c4d5e6f708192",
+              "spanId": "0f1e2d3c4b5a6978",
+              "parentSpanId": "",
+              "name": "invoke_agent reconciliation_investigator",
+              "kind": 1,
+              "startTimeUnixNano": "1786713300000000000",
+              "endTimeUnixNano": "1786713303610000000",
+              "attributes": [
+                { "key": "gen_ai.operation.name", "value": { "stringValue": "invoke_agent" } },
+                { "key": "gen_ai.agent.name", "value": { "stringValue": "reconciliation_investigator" } },
+                {
+                  "key": "input.value",
+                  "value": {
+                    "stringValue": "Missing reference: BNK-20260814-0093 for 780.00 GBP has an empty remittance field. Identify the counterparty."
+                  }
+                },
+                {
+                  "key": "output.value",
+                  "value": {
+                    "stringValue": "Counterparty is CP-2210 (Halden Print Services), matched on the sort-code/account pair. Evidence: BNK-20260814-0093, CP-2210."
+                  }
+                }
+              ],
+              "status": { "code": 1 }
+            },
+            {
+              "traceId": "2b3c4d5e6f708192ab3c4d5e6f708192",
+              "spanId": "1e2d3c4b5a697869",
+              "parentSpanId": "0f1e2d3c4b5a6978",
+              "name": "execute_tool search_counterparty",
+              "kind": 1,
+              "startTimeUnixNano": "1786713300210000000",
+              "endTimeUnixNano": "1786713300560000000",
+              "attributes": [
+                { "key": "gen_ai.operation.name", "value": { "stringValue": "execute_tool" } },
+                { "key": "gen_ai.tool.name", "value": { "stringValue": "search_counterparty" } },
+                {
+                  "key": "gen_ai.tool.call.arguments",
+                  "value": { "stringValue": "{\"sort_code\":\"20-45-11\",\"account_last4\":\"8842\"}" }
+                },
+                {
+                  "key": "gen_ai.tool.call.result",
+                  "value": { "stringValue": "{\"counterparty_id\":\"CP-2210\",\"name\":\"Halden Print Services\",\"confidence\":0.94}" }
+                }
+              ],
+              "status": { "code": 1 }
+            },
+            {
+              "traceId": "2b3c4d5e6f708192ab3c4d5e6f708192",
+              "spanId": "2d3c4b5a69786950",
+              "parentSpanId": "0f1e2d3c4b5a6978",
+              "name": "chat gpt-4o-mini",
+              "kind": 3,
+              "startTimeUnixNano": "1786713300620000000",
+              "endTimeUnixNano": "1786713303550000000",
+              "attributes": [
+                { "key": "gen_ai.operation.name", "value": { "stringValue": "chat" } },
+                { "key": "gen_ai.request.model", "value": { "stringValue": "gpt-4o-mini" } },
+                { "key": "gen_ai.usage.input_tokens", "value": { "intValue": "533" } },
+                { "key": "gen_ai.usage.output_tokens", "value": { "intValue": "71" } },
+                {
+                  "key": "gen_ai.prompt",
+                  "value": {
+                    "stringValue": "[{\"role\":\"user\",\"content\":\"Counterparty match returned CP-2210 at 0.94 confidence. Conclude.\"}]"
+                  }
+                },
+                {
+                  "key": "gen_ai.completion",
+                  "value": {
+                    "stringValue": "[{\"role\":\"assistant\",\"content\":\"Counterparty is CP-2210 (Halden Print Services), matched on the sort-code/account pair. Evidence: BNK-20260814-0093, CP-2210.\"}]"
+                  }
+                }
+              ],
+              "status": { "code": 1 }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

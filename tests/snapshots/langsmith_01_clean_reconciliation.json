@@ -1,0 +1,69 @@
+{
+  "report": {
+    "errors": [],
+    "format": "langsmith",
+    "records_seen": 5,
+    "runs_imported": 1,
+    "steps_imported": 4,
+    "warnings": []
+  },
+  "runs": [
+    {
+      "input": "Bank transaction BNK-20260815-0007 for 1,955.00 GBP is unmatched. Find the offsetting entry and cite evidence.",
+      "meta": {
+        "n_handoff": 0,
+        "n_llm": 2,
+        "n_step_errors": 0,
+        "n_steps": 4,
+        "n_tool": 2,
+        "record_count": 5,
+        "root_name": "reconciliation_investigator",
+        "session": "s-2026-08-week33",
+        "source_file": "01_clean_reconciliation.jsonl",
+        "tags": [
+          "reconciliation",
+          "v0.3.1"
+        ],
+        "trace_id": "3f8c1a90-0001-4a11-9c01-aa0000000001"
+      },
+      "outcome": {
+        "error": null,
+        "output": "Matched to INV-2026-1122 (1,955.00 GBP, PO-78002). The reference field was blank so the match is on amount plus counterparty. Evidence: INV-2026-1122, PO-78002, CP-5510.",
+        "status": "success"
+      },
+      "run_id": "3f8c1a90-0001-4a11-9c01-aa0000000001",
+      "source": "langsmith",
+      "started": "2026-08-15T08:15:00+00:00",
+      "steps": [
+        {
+          "args_preview": "system: You are a reconciliation analyst. Every hypothesis must cite evidence ids. user: Unmatched: BNK-20260815-0007, 1955.00 GBP, blank remittance reference. Plan your tool calls.",
+          "kind": "llm",
+          "latency": 1560.0,
+          "name": "ChatOpenAI",
+          "output_preview": "I will search for open invoices with a gross of 1955.00 in the current period."
+        },
+        {
+          "args_preview": "{\"amount\":1955.0,\"currency\":\"GBP\",\"period\":\"2026-08\"}",
+          "kind": "tool",
+          "latency": 330.0,
+          "name": "get_gl_entries",
+          "output_preview": "[{\"gl_entry\":\"GL-90114\",\"gross\":1955.0,\"invoice_id\":\"INV-2026-1122\",\"po\":\"PO-78002\"}]"
+        },
+        {
+          "args_preview": "{\"account_last4\":\"1174\",\"sort_code\":\"30-92-04\"}",
+          "kind": "tool",
+          "latency": 270.0,
+          "name": "search_counterparty",
+          "output_preview": "{\"confidence\":0.91,\"counterparty_id\":\"CP-5510\",\"name\":\"Ashgrove Instruments\"}"
+        },
+        {
+          "args_preview": "user: GL-90114 / INV-2026-1122 matches on amount; counterparty CP-5510 at 0.91. Write the conclusion with evidence ids.",
+          "kind": "llm",
+          "latency": 3230.0,
+          "name": "ChatOpenAI",
+          "output_preview": "Matched to INV-2026-1122 (1,955.00 GBP, PO-78002). Reference was blank so the match is on amount plus counterparty. Evidence: INV-2026-1122, PO-78002, CP-5510."
+        }
+      ]
+    }
+  ]
+}

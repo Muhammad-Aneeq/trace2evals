@@ -86,7 +86,8 @@ def build_parser() -> argparse.ArgumentParser:
     p_export = sub.add_parser(
         "export",
         help="export eval cases at a version",
-        description="Write versioned cases.jsonl, a generated pytest stub, and optional Promptfoo YAML.",
+        description="Write versioned cases.jsonl, a generated pytest stub, "
+        "and optional Promptfoo YAML.",
     )
     p_export.add_argument(
         "--version",

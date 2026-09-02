@@ -1,0 +1,103 @@
+{
+  "report": {
+    "errors": [
+      {
+        "excerpt": "this resourceSpans entry should have been an object, not a string",
+        "locator": "resourceSpans[1]",
+        "reason": "not a JSON object"
+      },
+      {
+        "excerpt": "{\"resource\": {\"attributes\": [{\"key\": \"service.name\", \"value\": {\"stringValue\": \"exception-workbench\"}}]}}",
+        "locator": "resourceSpans[2]",
+        "reason": "missing or invalid `scopeSpans`"
+      },
+      {
+        "excerpt": "12345",
+        "locator": "resourceSpans[3].scopeSpans[0]",
+        "reason": "not a JSON object"
+      },
+      {
+        "excerpt": "null",
+        "locator": "resourceSpans[3].scopeSpans[1].spans[0]",
+        "reason": "not a JSON object"
+      },
+      {
+        "excerpt": "http.request POST /internal/metrics",
+        "locator": "trace cccc9999dddd0000eeee1111ffff2222",
+        "reason": "no GenAI spans in trace (no model call, tool call, or agent span)"
+      }
+    ],
+    "format": "otel",
+    "records_seen": 8,
+    "runs_imported": 2,
+    "steps_imported": 2,
+    "warnings": []
+  },
+  "runs": [
+    {
+      "input": "Unapplied credit note CN-2026-0042 for 310.00 GBP. Determine which invoice it should offset.",
+      "meta": {
+        "n_handoff": 0,
+        "n_llm": 0,
+        "n_step_errors": 0,
+        "n_steps": 1,
+        "n_tool": 1,
+        "root_span": "invoke_agent reconciliation_investigator",
+        "scope": "opentelemetry.instrumentation.langgraph",
+        "service": "exception-workbench",
+        "source_file": "06_malformed_mixed.json",
+        "span_count": 2,
+        "trace_id": "aaaa1111bbbb2222cccc3333dddd4444"
+      },
+      "outcome": {
+        "error": null,
+        "output": "CN-2026-0042 offsets INV-2026-0776 (same PO-76550, same counterparty CP-1180). Evidence: CN-2026-0042, INV-2026-0776, PO-76550.",
+        "status": "success"
+      },
+      "run_id": "aaaa1111bbbb2222cccc3333dddd4444",
+      "source": "otel",
+      "started": "2026-08-14T15:15:00+00:00",
+      "steps": [
+        {
+          "args_preview": "{\"po\":\"PO-76550\"}",
+          "kind": "tool",
+          "latency": 330.0,
+          "name": "get_invoice",
+          "output_preview": "{\"counterparty_id\":\"CP-1180\",\"gross\":310.0,\"invoice_id\":\"INV-2026-0776\"}"
+        }
+      ]
+    },
+    {
+      "input": "user: Write off BNK-20260814-0110 for 12.40 GBP?",
+      "meta": {
+        "n_handoff": 0,
+        "n_llm": 1,
+        "n_step_errors": 0,
+        "n_steps": 1,
+        "n_tool": 0,
+        "root_span": "chat gpt-4o-mini",
+        "scope": "opentelemetry.instrumentation.langgraph",
+        "source_file": "06_malformed_mixed.json",
+        "span_count": 1,
+        "trace_id": "eeee5555ffff6666aaaa7777bbbb8888"
+      },
+      "outcome": {
+        "error": null,
+        "output": "assistant: Yes - immaterial, auto write-off.",
+        "status": "success"
+      },
+      "run_id": "eeee5555ffff6666aaaa7777bbbb8888",
+      "source": "otel",
+      "started": null,
+      "steps": [
+        {
+          "args_preview": "user: Write off BNK-20260814-0110 for 12.40 GBP?",
+          "kind": "llm",
+          "latency": null,
+          "name": "gpt-4o-mini",
+          "output_preview": "assistant: Yes - immaterial, auto write-off."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,87 @@
+{
+  "report": {
+    "errors": [],
+    "format": "otel",
+    "records_seen": 8,
+    "runs_imported": 1,
+    "steps_imported": 7,
+    "warnings": []
+  },
+  "runs": [
+    {
+      "input": "Duplicate-looking payment pair BNK-20260814-0051 / BNK-20260814-0052 for NORTHWIND SUPPLIES, both 2,340.00 EUR. Contact on file is accounts@northwind-supplies.example, phone +44 20 7946 0958. Determine whether this is a true duplicate.",
+      "meta": {
+        "n_handoff": 0,
+        "n_llm": 2,
+        "n_step_errors": 0,
+        "n_steps": 7,
+        "n_tool": 5,
+        "root_span": "invoke_agent reconciliation_investigator",
+        "scope": "opentelemetry.instrumentation.langgraph",
+        "service": "exception-workbench",
+        "source_file": "02_tool_heavy_with_pii.json",
+        "span_count": 8,
+        "trace_id": "7c1d5e9a3f8b2d6c4a0e7f1b8d3c5a92"
+      },
+      "outcome": {
+        "error": null,
+        "output": "Not a duplicate: BNK-20260814-0051 settles INV-2026-0913, BNK-20260814-0052 settles INV-2026-0928. Identical amounts are coincidental (same monthly retainer). Evidence: INV-2026-0913, INV-2026-0928, PO-77340, PO-77341.",
+        "status": "success"
+      },
+      "run_id": "7c1d5e9a3f8b2d6c4a0e7f1b8d3c5a92",
+      "source": "otel",
+      "started": "2026-08-14T10:15:00+00:00",
+      "steps": [
+        {
+          "args_preview": "user: Two same-amount payments to NORTHWIND SUPPLIES. Vendor bank details on file: IBAN GB29NWBK60161331926819, corporate card 4111111111111111. Plan the duplicate check.",
+          "kind": "llm",
+          "latency": 1860.0,
+          "name": "gpt-4o-mini",
+          "output_preview": "assistant: I will pull both transactions, then the open invoices, then compare PO references before concluding."
+        },
+        {
+          "args_preview": "{\"ids\":[\"BNK-20260814-0051\",\"BNK-20260814-0052\"]}",
+          "kind": "tool",
+          "latency": 380.0,
+          "name": "get_bank_transactions",
+          "output_preview": "[{\"amount\":2340.0,\"currency\":\"EUR\",\"id\":\"BNK-20260814-0051\",\"reference\":\"PO-77340\"},{\"amount\":2340.0,\"currency\":\"EUR\",\"id\":\"BNK-20260814-0052\",\"reference\":\"PO-77341\"}]"
+        },
+        {
+          "args_preview": "{\"include_aliases\":true,\"name\":\"NORTHWIND SUPPLIES\"}",
+          "kind": "tool",
+          "latency": 270.0,
+          "name": "search_counterparty",
+          "output_preview": "{\"contact_email\":\"accounts@northwind-supplies.example\",\"contact_phone\":\"+44 20 7946 0958\",\"counterparty_id\":\"CP-3312\",\"open_invoices\":[\"INV-2026-0913\",\"INV-2026-0928\"]}"
+        },
+        {
+          "args_preview": "{\"invoice_id\":\"INV-2026-0913\"}",
+          "kind": "tool",
+          "latency": 280.0,
+          "name": "get_invoice",
+          "output_preview": "{\"gross\":2340.0,\"invoice_id\":\"INV-2026-0913\",\"period\":\"2026-07\",\"po\":\"PO-77340\"}"
+        },
+        {
+          "args_preview": "{\"invoice_id\":\"INV-2026-0928\"}",
+          "kind": "tool",
+          "latency": 260.0,
+          "name": "get_invoice",
+          "output_preview": "{\"gross\":2340.0,\"invoice_id\":\"INV-2026-0928\",\"period\":\"2026-08\",\"po\":\"PO-77341\"}"
+        },
+        {
+          "args_preview": "{\"counterparty_id\":\"CP-3312\",\"period\":\"2026-08\"}",
+          "kind": "tool",
+          "latency": 410.0,
+          "name": "get_period_summary",
+          "output_preview": "{\"period\":\"2026-08\",\"recurring_retainer\":2340.0,\"schedule\":\"monthly\"}"
+        },
+        {
+          "args_preview": "user: Both invoices exist with distinct POs and consecutive periods. Conclude on the duplicate question with evidence ids.",
+          "kind": "llm",
+          "latency": 7880.0,
+          "name": "gpt-4o-mini",
+          "output_preview": "assistant: Not a duplicate. Distinct POs (PO-77340, PO-77341) and consecutive monthly retainer periods explain the identical amounts. Evidence: INV-2026-0913, INV-2026-0928."
+        }
+      ]
+    }
+  ]
+}

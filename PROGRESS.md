@@ -43,3 +43,55 @@ not things that were intended.
 
 **Next**
 - Phase 1: schemas, ORM/store, both parsers, normalizer, 12 synthetic fixtures, snapshot tests.
+
+---
+
+## Phase 1 - Parsers + normalizer + store + fixtures
+
+**Status:** complete
+
+**Done**
+- `schemas.py` with the F2 contract pinned: `Step`, `TraceRun`, `Outcome`, plus `RawStep`/`RawRun` as the
+  parser-to-normalizer intermediate and `ParseReport`/`RecordError` for per-record error reporting.
+  `spec_dump()` on `Step`/`TraceRun` emits *exactly* the F2 fields, so the contract is asserted
+  independently of the storage extras.
+- `models.py` + `store.py`: the five specced tables, plus repository functions for save/list/filter,
+  unlabeled-first ordering, `next_unlabeled` (auto-advance), labels, cases and export versions.
+- **OTel importer**: OTLP `resourceSpans` walk plus the two flatter shapes, full `AnyValue` decoding,
+  tolerant GenAI attribute alias tables, span-event prompts, `status.code`/`exception`-event errors, and
+  span classification into llm / tool / handoff with the root agent span treated as the run container.
+- **LangSmith importer**: JSONL (and whole-file array) records, `run_type` mapping, root-chain-as-container,
+  `dotted_order` ordering, and `parent_run_id` walking for exports with no `trace_id`.
+- `normalizer.py` as the single place that decides previews, latency, ordering and outcome, so both
+  formats normalize identically. Renders chat messages and LangChain `generations` readably.
+- `redaction.py` implemented in full and wired *before* normalization (D-011), with a Luhn check so
+  16-digit reference numbers are not mistaken for card numbers.
+- `ingest.py`: the shared parse -> redact -> normalize -> store pipeline (D-012).
+- 12 synthetic fixtures (6 per format) covering clean, tool-heavy, tool-error, handoff, minimal and
+  malformed cases, with provenance in `fixtures/README.md` and the mapping tables in `docs/importers.md`.
+
+**Verified by running**
+- `uv run pytest` - **135 passed**, covering 12 snapshot-tested normalizations, the malformed-record
+  contract for both formats, 27 normalizer unit tests, 20 store tests, 22 redaction tests and 13 ingest
+  tests. Snapshots re-run clean after regeneration, so they are stable rather than self-confirming.
+- `uv run ruff check .` - **All checks passed.**
+
+**Bugs found and fixed while testing** (each was a real defect, not a test artefact)
+- SQLite silently discards `tzinfo`, so a reloaded run compared unequal to the one written. Fixed with a
+  `UtcDateTime` type decorator (D-013).
+- On re-import, clearing the steps relationship left it cached as empty, so replacement steps were
+  invisible for the rest of the session. Fixed by appending through the relationship.
+- A trace of pure infrastructure spans was imported as an empty, unlabelable run; it is now reported as
+  an error instead.
+- Tool-arg previews unwrapped single-key dicts, turning `{"po":"PO-76550"}` into a contextless
+  `"PO-76550"`. Now only genuine wrapper keys are unwrapped.
+- LangSmith `{"generations": [...]}` outputs rendered as raw JSON instead of the completion text.
+
+**Measurements**
+- 12 fixtures parse to **16 runs and 45 steps**. All 10 reported record errors come from the two
+  malformed fixtures (5 each), and both of those still import 2 intact runs apiece - which is exactly the
+  strict-but-forgiving contract holding.
+- Full suite runtime: ~1.4s.
+
+**Next**
+- Phase 2: FastAPI routes, the aurora components, and the keyboard labeling flow with session stats.

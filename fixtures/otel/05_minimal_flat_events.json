@@ -1,0 +1,37 @@
+{
+  "spans": [
+    {
+      "trace_id": "5f6e7d8c9b0a1234f5e6d7c8b9a01234",
+      "span_id": "9a8b7c6d5e4f3021",
+      "parent_span_id": "",
+      "name": "chat gpt-4o-mini",
+      "kind": 3,
+      "start_time_unix_nano": "1786716900000000000",
+      "end_time_unix_nano": "1786716902310000000",
+      "attributes": {
+        "gen_ai.system": "openai",
+        "gen_ai.operation.name": "chat",
+        "gen_ai.request.model": "gpt-4o-mini",
+        "gen_ai.usage.input_tokens": 214,
+        "gen_ai.usage.output_tokens": 39
+      },
+      "events": [
+        {
+          "name": "gen_ai.user.message",
+          "time_unix_nano": "1786716900010000000",
+          "attributes": {
+            "gen_ai.event.content": "{\"role\":\"user\",\"content\":\"Does BNK-20260814-0101 for 55.00 GBP need investigation, or is it below the materiality threshold of 100.00?\"}"
+          }
+        },
+        {
+          "name": "gen_ai.choice",
+          "time_unix_nano": "1786716902300000000",
+          "attributes": {
+            "gen_ai.event.content": "{\"role\":\"assistant\",\"content\":\"Below the 100.00 materiality threshold; auto-write-off is appropriate. No investigation required.\"}"
+          }
+        }
+      ],
+      "status": { "code": 1 }
+    }
+  ]
+}

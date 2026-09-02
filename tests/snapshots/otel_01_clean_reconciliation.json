@@ -1,0 +1,66 @@
+{
+  "report": {
+    "errors": [],
+    "format": "otel",
+    "records_seen": 5,
+    "runs_imported": 1,
+    "steps_imported": 4,
+    "warnings": []
+  },
+  "runs": [
+    {
+      "input": "Bank transaction BNK-20260814-0042 for 4,812.50 GBP has no matching GL entry. Investigate and propose a root cause with evidence.",
+      "meta": {
+        "n_handoff": 0,
+        "n_llm": 2,
+        "n_step_errors": 0,
+        "n_steps": 4,
+        "n_tool": 2,
+        "root_span": "invoke_agent reconciliation_investigator",
+        "scope": "opentelemetry.instrumentation.langgraph",
+        "service": "exception-workbench",
+        "source_file": "01_clean_reconciliation.json",
+        "span_count": 5,
+        "trace_id": "4f2a9c1e8b7d6a5f3e2d1c0b9a8f7e6d"
+      },
+      "outcome": {
+        "error": null,
+        "output": "Root cause: partial payment. BNK-20260814-0042 (4,812.50) settles invoice INV-2026-0881 (6,000.00) in part; residual 1,187.50 remains open. Evidence: INV-2026-0881, GL-88213, BNK-20260814-0042.",
+        "status": "success"
+      },
+      "run_id": "4f2a9c1e8b7d6a5f3e2d1c0b9a8f7e6d",
+      "source": "otel",
+      "started": "2026-08-14T09:15:00+00:00",
+      "steps": [
+        {
+          "args_preview": "system: You are a reconciliation analyst. Every hypothesis must cite evidence ids. user: Unmatched bank transaction BNK-20260814-0042, 4812.50 GBP, counterparty ORBITAL LOGISTICS LTD. Decide which tools to call.",
+          "kind": "llm",
+          "latency": 1620.0,
+          "name": "gpt-4o-mini",
+          "output_preview": "assistant: I need the open invoices for this counterparty and the GL entries around the value date."
+        },
+        {
+          "args_preview": "{\"include_aliases\":true,\"name\":\"ORBITAL LOGISTICS LTD\"}",
+          "kind": "tool",
+          "latency": 230.0,
+          "name": "search_counterparty",
+          "output_preview": "{\"aliases\":[\"Orbital Logistics\",\"ORBITAL LOG LTD\"],\"counterparty_id\":\"CP-4471\",\"open_invoices\":[\"INV-2026-0881\",\"INV-2026-0902\"]}"
+        },
+        {
+          "args_preview": "{\"invoice_id\":\"INV-2026-0881\"}",
+          "kind": "tool",
+          "latency": 280.0,
+          "name": "get_invoice",
+          "output_preview": "{\"currency\":\"GBP\",\"gl_entry\":\"GL-88213\",\"gross\":6000.0,\"invoice_id\":\"INV-2026-0881\",\"paid_to_date\":0.0,\"po\":\"PO-77120\"}"
+        },
+        {
+          "args_preview": "user: Given INV-2026-0881 gross 6000.00 paid_to_date 0.00 and bank amount 4812.50, produce the ranked hypotheses with evidence ids.",
+          "kind": "llm",
+          "latency": 3970.0,
+          "name": "gpt-4o-mini",
+          "output_preview": "assistant: Hypothesis 1 (confidence 0.86): partial payment against INV-2026-0881; residual 1187.50 open. Evidence: INV-2026-0881, GL-88213, BNK-20260814-0042."
+        }
+      ]
+    }
+  ]
+}

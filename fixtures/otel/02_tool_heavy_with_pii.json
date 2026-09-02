@@ -1,0 +1,208 @@
+{
+  "resourceSpans": [
+    {
+      "resource": {
+        "attributes": [
+          { "key": "service.name", "value": { "stringValue": "exception-workbench" } },
+          { "key": "deployment.environment", "value": { "stringValue": "staging" } }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": { "name": "opentelemetry.instrumentation.langgraph", "version": "0.21.0" },
+          "spans": [
+            {
+              "traceId": "7c1d5e9a3f8b2d6c4a0e7f1b8d3c5a92",
+              "spanId": "1122334455667788",
+              "parentSpanId": "",
+              "name": "invoke_agent reconciliation_investigator",
+              "kind": 1,
+              "startTimeUnixNano": "1786702500000000000",
+              "endTimeUnixNano": "1786702511930000000",
+              "attributes": [
+                { "key": "gen_ai.operation.name", "value": { "stringValue": "invoke_agent" } },
+                { "key": "gen_ai.agent.name", "value": { "stringValue": "reconciliation_investigator" } },
+                {
+                  "key": "input.value",
+                  "value": {
+                    "stringValue": "Duplicate-looking payment pair BNK-20260814-0051 / BNK-20260814-0052 for NORTHWIND SUPPLIES, both 2,340.00 EUR. Contact on file is accounts@northwind-supplies.example, phone +44 20 7946 0958. Determine whether this is a true duplicate."
+                  }
+                },
+                {
+                  "key": "output.value",
+                  "value": {
+                    "stringValue": "Not a duplicate: BNK-20260814-0051 settles INV-2026-0913, BNK-20260814-0052 settles INV-2026-0928. Identical amounts are coincidental (same monthly retainer). Evidence: INV-2026-0913, INV-2026-0928, PO-77340, PO-77341."
+                  }
+                }
+              ],
+              "status": { "code": 1 }
+            },
+            {
+              "traceId": "7c1d5e9a3f8b2d6c4a0e7f1b8d3c5a92",
+              "spanId": "2233445566778899",
+              "parentSpanId": "1122334455667788",
+              "name": "chat gpt-4o-mini",
+              "kind": 3,
+              "startTimeUnixNano": "1786702500180000000",
+              "endTimeUnixNano": "1786702502040000000",
+              "attributes": [
+                { "key": "gen_ai.system", "value": { "stringValue": "openai" } },
+                { "key": "gen_ai.operation.name", "value": { "stringValue": "chat" } },
+                { "key": "gen_ai.request.model", "value": { "stringValue": "gpt-4o-mini" } },
+                { "key": "gen_ai.usage.input_tokens", "value": { "intValue": "742" } },
+                { "key": "gen_ai.usage.output_tokens", "value": { "intValue": "134" } },
+                {
+                  "key": "gen_ai.prompt",
+                  "value": {
+                    "stringValue": "[{\"role\":\"user\",\"content\":\"Two same-amount payments to NORTHWIND SUPPLIES. Vendor bank details on file: IBAN GB29NWBK60161331926819, corporate card 4111111111111111. Plan the duplicate check.\"}]"
+                  }
+                },
+                {
+                  "key": "gen_ai.completion",
+                  "value": {
+                    "stringValue": "[{\"role\":\"assistant\",\"content\":\"I will pull both transactions, then the open invoices, then compare PO references before concluding.\"}]"
+                  }
+                }
+              ],
+              "status": { "code": 1 }
+            },
+            {
+              "traceId": "7c1d5e9a3f8b2d6c4a0e7f1b8d3c5a92",
+              "spanId": "3344556677889900",
+              "parentSpanId": "1122334455667788",
+              "name": "execute_tool get_bank_transactions",
+              "kind": 1,
+              "startTimeUnixNano": "1786702502100000000",
+              "endTimeUnixNano": "1786702502480000000",
+              "attributes": [
+                { "key": "gen_ai.operation.name", "value": { "stringValue": "execute_tool" } },
+                { "key": "gen_ai.tool.name", "value": { "stringValue": "get_bank_transactions" } },
+                {
+                  "key": "gen_ai.tool.call.arguments",
+                  "value": { "stringValue": "{\"ids\":[\"BNK-20260814-0051\",\"BNK-20260814-0052\"]}" }
+                },
+                {
+                  "key": "gen_ai.tool.call.result",
+                  "value": {
+                    "stringValue": "[{\"id\":\"BNK-20260814-0051\",\"amount\":2340.00,\"currency\":\"EUR\",\"reference\":\"PO-77340\"},{\"id\":\"BNK-20260814-0052\",\"amount\":2340.00,\"currency\":\"EUR\",\"reference\":\"PO-77341\"}]"
+                  }
+                }
+              ],
+              "status": { "code": 1 }
+            },
+            {
+              "traceId": "7c1d5e9a3f8b2d6c4a0e7f1b8d3c5a92",
+              "spanId": "4455667788990011",
+              "parentSpanId": "1122334455667788",
+              "name": "execute_tool search_counterparty",
+              "kind": 1,
+              "startTimeUnixNano": "1786702502540000000",
+              "endTimeUnixNano": "1786702502810000000",
+              "attributes": [
+                { "key": "gen_ai.operation.name", "value": { "stringValue": "execute_tool" } },
+                { "key": "gen_ai.tool.name", "value": { "stringValue": "search_counterparty" } },
+                {
+                  "key": "gen_ai.tool.call.arguments",
+                  "value": { "stringValue": "{\"name\":\"NORTHWIND SUPPLIES\",\"include_aliases\":true}" }
+                },
+                {
+                  "key": "gen_ai.tool.call.result",
+                  "value": {
+                    "stringValue": "{\"counterparty_id\":\"CP-3312\",\"contact_email\":\"accounts@northwind-supplies.example\",\"contact_phone\":\"+44 20 7946 0958\",\"open_invoices\":[\"INV-2026-0913\",\"INV-2026-0928\"]}"
+                  }
+                }
+              ],
+              "status": { "code": 1 }
+            },
+            {
+              "traceId": "7c1d5e9a3f8b2d6c4a0e7f1b8d3c5a92",
+              "spanId": "5566778899001122",
+              "parentSpanId": "1122334455667788",
+              "name": "execute_tool get_invoice",
+              "kind": 1,
+              "startTimeUnixNano": "1786702502870000000",
+              "endTimeUnixNano": "1786702503150000000",
+              "attributes": [
+                { "key": "gen_ai.operation.name", "value": { "stringValue": "execute_tool" } },
+                { "key": "gen_ai.tool.name", "value": { "stringValue": "get_invoice" } },
+                { "key": "gen_ai.tool.call.arguments", "value": { "stringValue": "{\"invoice_id\":\"INV-2026-0913\"}" } },
+                {
+                  "key": "gen_ai.tool.call.result",
+                  "value": { "stringValue": "{\"invoice_id\":\"INV-2026-0913\",\"gross\":2340.00,\"po\":\"PO-77340\",\"period\":\"2026-07\"}" }
+                }
+              ],
+              "status": { "code": 1 }
+            },
+            {
+              "traceId": "7c1d5e9a3f8b2d6c4a0e7f1b8d3c5a92",
+              "spanId": "6677889900112233",
+              "parentSpanId": "1122334455667788",
+              "name": "execute_tool get_invoice",
+              "kind": 1,
+              "startTimeUnixNano": "1786702503210000000",
+              "endTimeUnixNano": "1786702503470000000",
+              "attributes": [
+                { "key": "gen_ai.operation.name", "value": { "stringValue": "execute_tool" } },
+                { "key": "gen_ai.tool.name", "value": { "stringValue": "get_invoice" } },
+                { "key": "gen_ai.tool.call.arguments", "value": { "stringValue": "{\"invoice_id\":\"INV-2026-0928\"}" } },
+                {
+                  "key": "gen_ai.tool.call.result",
+                  "value": { "stringValue": "{\"invoice_id\":\"INV-2026-0928\",\"gross\":2340.00,\"po\":\"PO-77341\",\"period\":\"2026-08\"}" }
+                }
+              ],
+              "status": { "code": 1 }
+            },
+            {
+              "traceId": "7c1d5e9a3f8b2d6c4a0e7f1b8d3c5a92",
+              "spanId": "7788990011223344",
+              "parentSpanId": "1122334455667788",
+              "name": "execute_tool get_period_summary",
+              "kind": 1,
+              "startTimeUnixNano": "1786702503530000000",
+              "endTimeUnixNano": "1786702503940000000",
+              "attributes": [
+                { "key": "gen_ai.operation.name", "value": { "stringValue": "execute_tool" } },
+                { "key": "gen_ai.tool.name", "value": { "stringValue": "get_period_summary" } },
+                { "key": "gen_ai.tool.call.arguments", "value": { "stringValue": "{\"period\":\"2026-08\",\"counterparty_id\":\"CP-3312\"}" } },
+                {
+                  "key": "gen_ai.tool.call.result",
+                  "value": { "stringValue": "{\"period\":\"2026-08\",\"recurring_retainer\":2340.00,\"schedule\":\"monthly\"}" }
+                }
+              ],
+              "status": { "code": 1 }
+            },
+            {
+              "traceId": "7c1d5e9a3f8b2d6c4a0e7f1b8d3c5a92",
+              "spanId": "8899001122334455",
+              "parentSpanId": "1122334455667788",
+              "name": "chat gpt-4o-mini",
+              "kind": 3,
+              "startTimeUnixNano": "1786702504000000000",
+              "endTimeUnixNano": "1786702511880000000",
+              "attributes": [
+                { "key": "gen_ai.system", "value": { "stringValue": "openai" } },
+                { "key": "gen_ai.operation.name", "value": { "stringValue": "chat" } },
+                { "key": "gen_ai.request.model", "value": { "stringValue": "gpt-4o-mini" } },
+                { "key": "gen_ai.usage.input_tokens", "value": { "intValue": "2118" } },
+                { "key": "gen_ai.usage.output_tokens", "value": { "intValue": "205" } },
+                {
+                  "key": "gen_ai.prompt",
+                  "value": {
+                    "stringValue": "[{\"role\":\"user\",\"content\":\"Both invoices exist with distinct POs and consecutive periods. Conclude on the duplicate question with evidence ids.\"}]"
+                  }
+                },
+                {
+                  "key": "gen_ai.completion",
+                  "value": {
+                    "stringValue": "[{\"role\":\"assistant\",\"content\":\"Not a duplicate. Distinct POs (PO-77340, PO-77341) and consecutive monthly retainer periods explain the identical amounts. Evidence: INV-2026-0913, INV-2026-0928.\"}]"
+                  }
+                }
+              ],
+              "status": { "code": 1 }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

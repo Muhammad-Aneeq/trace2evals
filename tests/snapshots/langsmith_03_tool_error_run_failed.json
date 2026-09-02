@@ -1,0 +1,63 @@
+{
+  "report": {
+    "errors": [],
+    "format": "langsmith",
+    "records_seen": 4,
+    "runs_imported": 1,
+    "steps_imported": 3,
+    "warnings": []
+  },
+  "runs": [
+    {
+      "input": "Reconcile the 2026-08 intercompany balance between entity GB01 and entity US04.",
+      "meta": {
+        "n_handoff": 0,
+        "n_llm": 1,
+        "n_step_errors": 1,
+        "n_steps": 3,
+        "n_tool": 2,
+        "record_count": 4,
+        "root_name": "reconciliation_investigator",
+        "session": "s-2026-08-week33",
+        "source_file": "03_tool_error_run_failed.jsonl",
+        "tags": [
+          "reconciliation",
+          "v0.3.1"
+        ],
+        "trace_id": "5b0e3c12-0003-4c33-9e03-cc0000000001"
+      },
+      "outcome": {
+        "error": "ToolException: propose_match failed after 3 retries: upstream ledger service returned 503",
+        "output": "{\"GB01\":{\"intercompany_balance\":448200.15},\"US04\":{\"intercompany_balance\":447985.85}}",
+        "status": "error"
+      },
+      "run_id": "5b0e3c12-0003-4c33-9e03-cc0000000001",
+      "source": "langsmith",
+      "started": "2026-08-15T10:45:00+00:00",
+      "steps": [
+        {
+          "args_preview": "user: Intercompany reconciliation GB01 vs US04 for 2026-08. Plan.",
+          "kind": "llm",
+          "latency": 1220.0,
+          "name": "ChatOpenAI",
+          "output_preview": "I will fetch both entity balances and then propose the match."
+        },
+        {
+          "args_preview": "{\"entities\":[\"GB01\",\"US04\"],\"period\":\"2026-08\"}",
+          "kind": "tool",
+          "latency": 350.0,
+          "name": "get_period_summary",
+          "output_preview": "{\"GB01\":{\"intercompany_balance\":448200.15},\"US04\":{\"intercompany_balance\":447985.85}}"
+        },
+        {
+          "args_preview": "{\"left\":\"GB01:448200.15\",\"right\":\"US04:447985.85\",\"tolerance\":0.0}",
+          "error": "ToolException: upstream ledger service returned 503 (attempt 3 of 3)",
+          "kind": "tool",
+          "latency": 1290.0,
+          "name": "propose_match",
+          "output_preview": ""
+        }
+      ]
+    }
+  ]
+}

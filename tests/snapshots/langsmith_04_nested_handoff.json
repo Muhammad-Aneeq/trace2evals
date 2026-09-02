@@ -1,0 +1,77 @@
+{
+  "report": {
+    "errors": [],
+    "format": "langsmith",
+    "records_seen": 7,
+    "runs_imported": 1,
+    "steps_imported": 5,
+    "warnings": []
+  },
+  "runs": [
+    {
+      "input": "Accrual reversal AC-2026-0311 for 4,120.00 GBP did not reverse in 2026-08. Route to the right specialist and resolve.",
+      "meta": {
+        "n_handoff": 1,
+        "n_llm": 2,
+        "n_step_errors": 0,
+        "n_steps": 5,
+        "n_tool": 2,
+        "record_count": 7,
+        "root_name": "triage_router",
+        "session": "s-2026-08-week33",
+        "skipped_records": 1,
+        "source_file": "04_nested_handoff.jsonl",
+        "tags": [
+          "triage",
+          "v0.3.1"
+        ],
+        "trace_id": "6c1f4d23-0004-4d44-8f04-dd0000000001"
+      },
+      "outcome": {
+        "error": null,
+        "output": "Routed to accruals_specialist. Root cause: the recurring schedule was end-dated 2026-07-31 so no reversal was generated for August. Escalated to the close checklist owner. Evidence: AC-2026-0311, SCHED-1188.",
+        "status": "success"
+      },
+      "run_id": "6c1f4d23-0004-4d44-8f04-dd0000000001",
+      "source": "langsmith",
+      "started": "2026-08-15T11:30:00+00:00",
+      "steps": [
+        {
+          "args_preview": "user: Classify this break and pick a specialist.",
+          "kind": "llm",
+          "latency": 850.0,
+          "name": "ChatOpenAI",
+          "output_preview": "Accrual scheduling issue. Handing off to accruals_specialist."
+        },
+        {
+          "args_preview": "{\"break_id\":\"AC-2026-0311\",\"from_agent\":\"triage_router\",\"reason\":\"accrual_not_reversed\"}",
+          "kind": "handoff",
+          "latency": 8500.0,
+          "name": "accruals_specialist",
+          "output_preview": "{\"escalated_to\":\"close_checklist_owner\",\"evidence\":[\"AC-2026-0311\",\"SCHED-1188\"],\"root_cause\":\"schedule_end_dated\"}"
+        },
+        {
+          "args_preview": "{\"accrual_id\":\"AC-2026-0311\"}",
+          "kind": "tool",
+          "latency": 370.0,
+          "name": "get_accrual_schedule",
+          "output_preview": "{\"auto_reverse\":true,\"end_date\":\"2026-07-31\",\"frequency\":\"monthly\",\"schedule_id\":\"SCHED-1188\"}"
+        },
+        {
+          "args_preview": "{\"break_id\":\"AC-2026-0311\",\"queue\":\"close_checklist\",\"reason\":\"recurring schedule end-dated before the period\"}",
+          "kind": "tool",
+          "latency": 380.0,
+          "name": "flag_exception",
+          "output_preview": "{\"flagged\":true,\"ticket\":\"ESC-4498\"}"
+        },
+        {
+          "args_preview": "user: SCHED-1188 is end-dated 2026-07-31 with auto_reverse true. Explain why August has no reversal and cite evidence.",
+          "kind": "llm",
+          "latency": 7390.0,
+          "name": "ChatOpenAI",
+          "output_preview": "The recurring schedule SCHED-1188 was end-dated 2026-07-31, so no August reversal was generated despite auto_reverse being enabled. Escalated to the close checklist owner. Evidence: AC-2026-0311, SCHED-1188."
+        }
+      ]
+    }
+  ]
+}
