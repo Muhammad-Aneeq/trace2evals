@@ -13,7 +13,7 @@ param(
     [Parameter(Position = 0)]
     [ValidateSet('help', 'install', 'dev', 'serve', 'build', 'test', 'test-backend',
         'test-frontend', 'lint', 'typecheck', 'eval', 'import', 'dogfood', 'export',
-        'stats', 'clean', 'up', 'down')]
+        'stats', 'clean', 'up', 'down', 'check-evals')]
     [string]$Target = 'help',
 
     [int]$Port = 8765
@@ -46,7 +46,8 @@ Trace2Evals - ./make.ps1 <target>
   test-backend   pytest
   test-frontend  vitest component tests
   test           lint + backend + typecheck + frontend
-  eval           the evals/ gate: the exported suite must be well-formed and non-vacuous
+  check-evals    the committed evals/ suite still matches what dogfood.py produces
+  eval           check-evals, then the suite-integrity gate
   import         import the bundled synthetic fixtures
   dogfood        import + label + build cases + export v1 into evals/
   export         export the v1 suite into exports/
@@ -93,7 +94,14 @@ Trace2Evals - ./make.ps1 <target>
         Write-Host 'all green' -ForegroundColor Green
     }
 
-    'eval' { Invoke-Step 'evals gate' { uv run pytest evals/ -p no:cacheprovider } }
+    'check-evals' {
+        Invoke-Step 'evals currency' { uv run python scripts/check_evals_current.py }
+    }
+
+    'eval' {
+        Invoke-Step 'evals currency' { uv run python scripts/check_evals_current.py }
+        Invoke-Step 'evals gate' { uv run pytest evals/ -p no:cacheprovider }
+    }
     'import' { Invoke-Step 't2e import' { uv run t2e import fixtures/otel fixtures/langsmith } }
     'dogfood' { Invoke-Step 'dogfood' { uv run python scripts/dogfood.py } }
 

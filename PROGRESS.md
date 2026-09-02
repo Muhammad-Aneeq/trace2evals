@@ -250,7 +250,26 @@ not things that were intended.
   What *is* measured and reported: the tool's own median label round trip is under 0.5s, so the tool
   contributes well under a second of the 10s budget. The `<10s median` target itself remains untested.
 
+**Bug found in my own CI design, and fixed**
+- The CI step "dogfood artefacts are current" used `git diff --exit-code -- evals/cases.jsonl`. Every
+  case carries a `created_at`, so a re-export always differs textually: that check would have **failed
+  on every single CI run** and been switched off within a week. It also passed vacuously while
+  `evals/` was still untracked, which is how it slipped through.
+- Replaced with `scripts/check_evals_current.py`, which re-runs the dogfood into a throwaway database
+  and compares *content* with the volatile timestamp excluded. Verified in both directions: it reports
+  OK on the committed suite, and when a judgement is deliberately flipped from `right` to `wrong` it
+  fails with a per-field diff naming the affected case. Wired into `make eval` / `./make.ps1 eval` and
+  CI (D-021).
+
 **Definition of done**
 - Fully verified except three spec 00 launch-checklist items that need a browser or a camera:
   screenshot, demo video, launch post. All three are marked unticked with reasons in PLAN.md section 6
   rather than quietly claimed.
+
+**Final state, all re-run on a clean database**
+- `uv run ruff check .` - All checks passed
+- `uv run pytest` - **305 passed**
+- `uv run pytest evals/` - 17 passed, 17 skipped
+- `uv run python scripts/check_evals_current.py` - OK, 16 cases
+- `npm run typecheck` / `npm test` (13 passed) / `npm run build` - clean
+- Five commits, one per phase, each with its tests green at the time of committing.

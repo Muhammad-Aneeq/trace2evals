@@ -402,6 +402,10 @@ Append-only. Every deviation from spec or judgment call, with one line of reason
 - **D-020** The generated pytest stub requires a user-supplied `run_agent` fixture and skips/errors
   loudly without one, rather than defaulting to something that passes -> a generated suite that goes
   green without an agent wired in is actively harmful in CI.
+- **D-021** The "dogfood artefacts are current" CI check compares *content* via
+  `scripts/check_evals_current.py` rather than bytes via `git diff --exit-code` -> every case carries a
+  `created_at`, so a byte comparison would have failed on every CI run and been disabled within a week.
+  A check that cries wolf is worse than no check. Verified to fail when a judgement is flipped.
 - **D-014** Added three endpoints beyond spec 03 sec 7: `GET /api/runs/next-unlabeled` (the labeler needs
   the next run's full detail to auto-advance), `DELETE /api/runs/{id}/label` (a fast keyboard flow will
   mislabel something, so undo is a correctness feature, not a nicety), and `GET /api/taxonomy` (so the UI

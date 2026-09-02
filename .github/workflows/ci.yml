@@ -49,8 +49,10 @@ jobs:
           test -s exports/promptfooconfig.yaml
 
       - name: Dogfood artefacts are committed and current
-        # A stale evals/ suite in the repo is a silent lie about what was labeled.
-        run: git diff --exit-code -- evals/cases.jsonl evals/test_cases.py
+        # A stale evals/ suite in the repo is a silent lie about what was labeled. This compares
+        # content rather than bytes: every case carries a `created_at`, so `git diff --exit-code`
+        # would fail on every run and get switched off.
+        run: uv run python scripts/check_evals_current.py
 
   frontend:
     name: typecheck + component tests

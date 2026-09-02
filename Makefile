@@ -13,7 +13,7 @@
 #   make stats   CI-friendly label distribution and case counts
 
 .DEFAULT_GOAL := help
-.PHONY: help install dev serve build test test-backend test-frontend lint typecheck eval \
+.PHONY: help install dev serve build test test-backend test-frontend lint typecheck eval check-evals \
         import dogfood export stats clean up down
 
 UV ?= uv
@@ -54,8 +54,11 @@ test-frontend: ## vitest component tests
 
 test: lint test-backend typecheck test-frontend ## everything
 
-eval: ## the evals/ gate: the exported suite must be well-formed and non-vacuous
+eval: check-evals ## the evals/ gate: the exported suite must be well-formed, non-vacuous and current
 	$(UV) run pytest evals/ -p no:cacheprovider
+
+check-evals: ## the committed evals/ suite still matches what dogfood.py produces
+	$(UV) run python scripts/check_evals_current.py
 
 import: ## import the bundled synthetic fixtures
 	$(UV) run t2e import fixtures/otel fixtures/langsmith
