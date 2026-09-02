@@ -28,6 +28,34 @@ shipped so downstream work continued. Nothing here silently stopped work.
 
 ---
 
+## B-004 - The "<10s median per label" claim is not verified by a human session
+
+- **What:** Spec 03 sec 9 makes speed the product claim: "target <10s median per simple label; measure
+  and show session stats." The measuring machinery is built, tested and displayed, but the target itself
+  has never been tested against a human labeling session.
+- **Tried:** The dogfood run (`scripts/dogfood.py`) labels all 16 fixture runs with considered
+  judgements, so the *distribution* is real. It records `seconds_spent=None`, because the alternative
+  was to invent per-label durations. There is no human on this machine to time, and no browser to run
+  an interactive session in (**B-003**), so the keystroke-to-keystroke timing a real labeler would
+  produce simply does not exist here.
+- **Needed to resolve:** One person, the built UI, and 16 traces: `make serve`, label them, then read
+  `t2e stats`. That is a ten-minute exercise for anyone with the repo, and it would settle the claim.
+- **Workaround shipped:** The two things that *can* be measured honestly, both reported separately:
+  1. **The tool's own contribution**: the median label round trip through the API is under 0.5s,
+     asserted in `tests/test_labeling_session.py`. So the tool adds well under 1s to each label; the
+     remaining ~9s of the budget is entirely human reading and deciding.
+  2. **The measurement path end to end**: labels submitted *with* a `seconds_spent` value produce a
+     correct median in `t2e stats`, `GET /api/stats` and the labeler's live panel - verified in the API
+     tests, the component tests, and a live HTTP run that moved the median to 5.5s.
+  `meets_speed_target` returns **null**, not `true`, when nothing has been timed. An unmeasured claim
+  must never report as a passing one, and there is a test for exactly that.
+- **Affected PLAN.md tasks:** Phase 4 "Record label distribution + median seconds per label" -
+  distribution recorded, human median **not** recorded.
+- **Impact on claims:** The README states the label distribution as a finding and states plainly that
+  the <10s median is a design target with the tool-side latency measured and the human side untested.
+
+---
+
 ## B-003 - No browser available to verify the UI interactively
 
 - **What:** After building the SPA and serving it with `t2e label --serve`, I tried to drive the real UI

@@ -296,21 +296,29 @@ Acceptance criteria quoted from spec:
 > Dogfood requirement: Project 01's investigation traces labeled with this tool before launch;
 > **findings in README** (spec 03 sec 10)
 
-- [ ] `redaction.py`: default patterns (email, phone, credit-card-like, SSN-like, API keys, IBAN),
-      config-extensible, applied at import; counts surfaced in the parse report
-- [ ] PII-lookalike detector -> warning banner in `ImportPage` and CLI import output
-- [ ] `test_redaction.py`: each pattern redacts; redaction is idempotent; no false-positive on ordinary text
-- [ ] Confirm zero telemetry / zero network calls in the runtime path (grep audit, documented)
-- [ ] **Dogfood:** import all fixtures, label them with the tool itself, build cases, export v1
-- [ ] Record label distribution + median seconds per label -> README findings section
-- [ ] Commit dogfood artifacts to `evals/cases.jsonl` + `evals/test_cases.py`; wire `make eval`
-- [ ] README: one-line pitch, mermaid architecture, quickstart, HONEST POSITIONING, synthetic banner,
+- [x] `redaction.py`: default patterns (email, phone, credit-card-like, SSN-like, API keys, IBAN),
+      config-extensible, applied at import; counts surfaced in the parse report *(landed Phase 1, D-011)*
+- [x] PII-lookalike detector -> warning banner in `ImportPage` and CLI import output
+- [x] `test_redaction.py`: each pattern redacts; redaction is idempotent; no false-positive on ordinary text
+- [x] Confirm zero telemetry / zero network calls in the runtime path (grep audit, documented)
+      -> backend has only the local server URL + dev CORS origin; frontend has exactly one `fetch`,
+      same-origin relative paths only; no analytics/telemetry/CDN/external font anywhere
+- [x] **Dogfood:** import all fixtures, label them with the tool itself, build cases, export v1
+      -> `scripts/dogfood.py`, reproducible via `make dogfood`. **Caveat: synthetic fixtures, B-001.**
+- [x] Record label distribution -> README findings section (10 right / 4 partial / 2 wrong;
+      `ungrounded` the dominant tag at 4 of 6 flagged runs)
+- [BLOCKED] Record median seconds per label -> **B-004**: no human labeling session could be timed
+      (no human, no browser). The tool-side median (<0.5s round trip) is measured and reported instead,
+      and `t2e stats` prints "no timed labels yet" rather than an invented number.
+- [x] Commit dogfood artifacts to `evals/cases.jsonl` + `evals/test_cases.py`; wire `make eval`
+- [x] README: one-line pitch, mermaid architecture, quickstart, HONEST POSITIONING, synthetic banner,
       STATUS from BLOCKERS.md, dogfood findings
-- [ ] `docs/importers.md`, `docs/cases_schema.md`, `evals/README.md`
-- [ ] `Makefile` + `make.ps1` (dev/test/eval/export/up/down); `.github/workflows/ci.yml`; `docker-compose.yml`
-- [ ] Verify definition of done item by item
-- [ ] `FINAL_REPORT.md`
-- [ ] Commit: "Phase 4: redaction, dogfood, README, docs"
+- [x] `docs/importers.md`, `docs/cases_schema.md`, `evals/README.md`
+- [x] `Makefile` + `make.ps1` (dev/test/eval/export/up/down); `.github/workflows/ci.yml`;
+      `docker-compose.yml` + `Dockerfile`
+- [x] Verify definition of done item by item (section 6 below)
+- [x] `FINAL_REPORT.md`
+- [x] Commit: "Phase 4: redaction, dogfood, README, docs"
 
 **Test plan:** full offline loop as a single scripted run - `t2e import` both formats -> label via API ->
 build cases -> `t2e export --version v1` -> run the generated `evals/test_cases.py` -> `t2e stats`. Golden
@@ -411,17 +419,39 @@ Append-only. Every deviation from spec or judgment call, with one line of reason
 
 ## 6. DEFINITION OF DONE TRACKER
 
-Checked off in Phase 4 against spec 00 sec E + spec 03.
+Verified item by item against spec 00 sec E + spec 03. Where verification was partial, it says so.
 
-- [ ] pipx/uv-installable CLI
-- [ ] `t2e label --serve` launches the UI locally
-- [ ] `make dev` works (+ `make.ps1` fallback, B-002)
-- [ ] Both importers pass fixture snapshot tests incl. malformed-record handling
-- [ ] Full offline loop: import -> label -> build cases -> export `cases.jsonl` + `test_cases.py`
-- [ ] Golden-file tests pass
-- [ ] Session stats visible (labels done, median seconds per label)
-- [ ] Redaction helper works; PII-lookalike warning shows
-- [ ] Dogfood completed; findings in README
-- [ ] README: pitch, mermaid diagram, quickstart, HONEST POSITIONING, synthetic banner, STATUS
-- [ ] PLAN.md fully ticked or unticked tasks marked BLOCKED with a reason
-- [ ] FINAL_REPORT.md written
+- [x] **pipx/uv-installable CLI** - `[project.scripts] t2e`, hatchling build over `backend/src/t2e`;
+      `uv sync` installs it and `uv run t2e --help` lists all four commands. `uv tool install .` is the
+      documented path (pipx is not installed locally, so that spelling is untested).
+- [x] **`t2e label --serve` launches the UI locally** - verified against a live server: `ui_built: true`,
+      SPA shell served on all five client routes, both assets served.
+- [x] **`make dev` works** - `make.ps1 dev` is the locally verified path; the `Makefile` is exercised by
+      a dedicated CI job (**B-002**: GNU `make` is not installed on this machine).
+- [x] **Both importers pass fixture snapshot tests incl. malformed-record handling** - 12 snapshots;
+      the two malformed fixtures report 5 record errors each and still import 2 intact runs apiece.
+- [x] **Full offline loop** - import -> label -> build cases -> export `cases.jsonl` + `test_cases.py`,
+      run end to end through the CLI, through the API, and through a live HTTP server.
+- [x] **Golden-file tests pass** - all three export formats byte-compared; the generated pytest suite is
+      additionally *executed* (12 passing with a correct adapter, failing with a broken one).
+- [x] **Session stats visible (labels done, median seconds per label)** - live in the labeler, in
+      `GET /api/stats` and in `t2e stats`. The median is computed from persisted per-label timings and
+      verified with real values; **B-004** means no human session supplied any.
+- [x] **Redaction helper works; PII-lookalike warning shows** - 22 tests incl. idempotence, Luhn
+      false-positive protection, and no rewriting of ordinary finance text; banner in UI and CLI.
+- [x] **Dogfood completed; findings in README** - on synthetic fixtures (**B-001**), reproducible via
+      `scripts/dogfood.py`; distribution and taxonomy in the README, artefacts committed to `evals/`.
+- [x] **README** - pitch, mermaid diagram, quickstart, HONEST POSITIONING, synthetic banner, STATUS.
+- [x] **PLAN.md fully ticked or unticked tasks marked BLOCKED with a reason** - one BLOCKED item
+      (median seconds per label -> B-004); everything else ticked.
+- [x] **FINAL_REPORT.md written** - state, commands, blockers with one-line fixes, next three.
+- [x] **`evals/` folder with a CI gate** (spec 00 A1) - suite-integrity gate, 17 passed / 17 skipped,
+      plus a CI check that the committed dogfood artefacts are current.
+- [x] **"Runs ~free" note** (spec 00 D, Track 1) - README Costs section; no `MODEL_COSTS.md` because
+      there is no model.
+- [ ] **Screenshot-first README** - **not done (B-003)**: no browser was available, and a mocked-up
+      screenshot would misrepresent what was verified. The README says so where the screenshot would be.
+- [ ] **60-90s demo video** - **not done**: requires screen capture of a real browser session (B-003).
+      Out of reach in this environment; the FINAL_REPORT lists it under what to do next.
+- [ ] **Launch post drafted** - **not done**: not requested by the build brief, which replaced spec 00's
+      launch checklist with its own definition of done.

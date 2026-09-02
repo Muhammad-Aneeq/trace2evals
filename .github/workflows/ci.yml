@@ -1,0 +1,137 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# The whole point of this tool is that it runs offline. CI therefore installs dependencies and then
+# exercises import -> label -> case -> export with no network access in the run itself.
+env:
+  PYTHONUNBUFFERED: "1"
+  FORCE_COLOR: "1"
+
+jobs:
+  backend:
+    name: lint + tests (python ${{ matrix.python }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - name: Sync dependencies
+        run: uv sync --extra dev --python ${{ matrix.python }}
+
+      - name: Lint (ruff)
+        run: uv run ruff check .
+
+      - name: Tests (pytest)
+        run: uv run pytest -q
+
+      - name: CLI smoke - the full offline loop
+        run: |
+          uv run t2e --help
+          uv run t2e import fixtures/otel fixtures/langsmith
+          uv run python scripts/dogfood.py
+          uv run t2e stats
+          uv run t2e export --version v1 --format jsonl,pytest,promptfoo --out exports
+          test -s exports/cases.jsonl
+          test -s exports/test_cases.py
+          test -s exports/promptfooconfig.yaml
+
+      - name: Dogfood artefacts are committed and current
+        # A stale evals/ suite in the repo is a silent lie about what was labeled.
+        run: git diff --exit-code -- evals/cases.jsonl evals/test_cases.py
+
+  frontend:
+    name: typecheck + component tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install
+        run: npm --prefix frontend ci
+
+      - name: Typecheck
+        run: npm --prefix frontend run typecheck
+
+      - name: Component tests
+        run: npm --prefix frontend run test
+
+      - name: Build the SPA
+        run: npm --prefix frontend run build
+
+      - name: The built UI is served by the packaged app
+        run: test -f backend/src/t2e/web/index.html
+
+  evals:
+    name: evals gate
+    runs-on: ubuntu-latest
+    needs: backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - run: uv sync --extra dev
+
+      # The signature gate every repo in this portfolio ships (spec 00 A1). Here it verifies suite
+      # integrity - the exported cases parse, carry the right schema version, and none is vacuous.
+      # It does not score an agent, because this repo contains the labeling tool, not an agent.
+      - name: Suite-integrity gate
+        run: uv run pytest evals/ -p no:cacheprovider -q
+
+  make:
+    name: make targets (verifies the Makefile B-002 could not verify locally)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: make install
+        run: make install
+
+      - name: make lint
+        run: make lint
+
+      - name: make test-backend
+        run: make test-backend
+
+      - name: make build
+        run: make build
+
+      - name: make eval
+        run: make eval
+
+      - name: make import + stats
+        run: |
+          make import
+          make stats

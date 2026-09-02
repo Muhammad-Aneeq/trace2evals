@@ -1,0 +1,38 @@
+# Optional (spec 03 sec 12: "docker-compose optional"). The primary install is `uv`/`pipx` - this
+# exists for anyone who would rather not put Python on their machine.
+#
+# The SPA must be built before `docker compose up`, because the image copies the built assets rather
+# than installing Node. `make up` / `./make.ps1 up` does the build for you.
+#
+# There is deliberately no volume mounted anywhere except your own data directory: no telemetry, no
+# outbound calls, nothing leaves the container except through the port you map.
+
+services:
+  t2e:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: trace2evals:local
+    container_name: t2e
+    ports:
+      - "127.0.0.1:8765:8765" # loopback only: this is a local tool, not a service
+    environment:
+      T2E_HOST: 0.0.0.0 # inside the container; the published port stays on loopback
+      T2E_PORT: "8765"
+      T2E_DB_PATH: /data/t2e.db
+    volumes:
+      # Your traces and your labels stay on your disk.
+      - ./.t2e-docker:/data
+      - ./fixtures:/app/fixtures:ro
+    command: ["t2e", "label", "--serve", "--no-browser", "--host", "0.0.0.0", "--port", "8765"]
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >-
+          python -c "import urllib.request,sys;
+          sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8765/api/health').status==200 else 1)"
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped

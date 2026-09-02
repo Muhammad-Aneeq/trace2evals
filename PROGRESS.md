@@ -198,3 +198,59 @@ not things that were intended.
 **Next**
 - Phase 4: dogfood the fixtures through the tool, then README, Makefile, CI, docker-compose and
   FINAL_REPORT.
+
+---
+
+## Phase 4 - Redaction + dogfood + README + docs
+
+**Status:** complete, with one item honestly blocked (B-004)
+
+**Done**
+- **Zero-telemetry audit**, as promised in the plan: the backend contains no HTTP client and no
+  outbound URL beyond the local server address and the dev CORS origin; the frontend has exactly one
+  `fetch`, always on a same-origin relative path; there is no analytics, telemetry, CDN or external
+  font anywhere in the tree. Redaction (delivered in Phase 1 per D-011) is confirmed to run before
+  normalization, so a secret cannot escape through a preview.
+- **Dogfood** via `scripts/dogfood.py` - committed and reproducible, not a one-off. It imports both
+  formats, applies 16 considered judgements (each with a note explaining the call), builds a case from
+  every labeled run, exports v1 into `evals/`, and prints stats.
+- `evals/` wired as the CI gate with a `conftest.py` whose `run_agent` fixture skips rather than
+  faking an agent: 17 structural checks pass, 17 agent checks skip.
+- `Makefile` (13 targets) + `make.ps1` mirror, `.github/workflows/ci.yml` (four jobs, including one
+  whose only purpose is to exercise the `Makefile` that B-002 prevented verifying locally),
+  `docker-compose.yml` + `Dockerfile`.
+- `README.md` with the pitch, a mermaid architecture diagram, quickstart, the keyboard table, an
+  HONEST POSITIONING section naming Langfuse/LangSmith/Braintrust/Foundry and saying plainly when to
+  use theirs instead, the dogfood findings, a privacy section, and a STATUS table of all four blockers.
+- `docs/cases_schema.md`, `evals/README.md`, `FINAL_REPORT.md`.
+
+**Dogfood findings (the actual numbers)**
+- 16 runs labeled: **10 right (62%), 4 partial (25%), 2 wrong (12%)**.
+- Failure tags across the 6 flagged runs: `ungrounded` 4, `no_escalation` 3, `wrong_tool` 1,
+  `bad_args` 1, `hallucinated_fact` 1, `format_break` 0, `other` 0.
+- **The interesting result:** the dominant failure was not a wrong tool call but an unsupported claim.
+  Three of the four `ungrounded` runs reached the *correct* conclusion and then asserted it with no
+  cited evidence - a distribution that a pass/fail accuracy metric would have hidden entirely.
+- The exported suite: 16 cases, 27 assertions - `must_cite` in 14, `must_call_tool` in 10,
+  `must_escalate` in 3, and no case with zero expectations.
+
+**Verified by running**
+- `uv run pytest` - **305 passed**; `uv run ruff check .` - clean.
+- `npm run typecheck`, `npm test` (13 passed), `npm run build` - clean.
+- `uv run python scripts/dogfood.py` - full loop, 16 runs -> 16 cases -> `evals/cases.jsonl` (8,500
+  bytes) + `evals/test_cases.py` (3,620 bytes).
+- `uv run pytest evals/` and `./make.ps1 eval` - 17 passed, 17 skipped.
+- `./make.ps1 help` - all targets listed.
+- Assertion-kind counts recomputed from the exported file rather than tallied by hand (my hand count
+  was wrong by one, and the README/evals docs were corrected to match the file).
+
+**Blocked**
+- **B-004**: no human labeling session could be timed (no human, no browser). The dogfood records
+  `seconds_spent=None` rather than inventing durations, so `t2e stats` prints "no timed labels yet".
+  What *is* measured and reported: the tool's own median label round trip is under 0.5s, so the tool
+  contributes well under a second of the 10s budget. The `<10s median` target itself remains untested.
+
+**Definition of done**
+- Fully verified except three spec 00 launch-checklist items that need a browser or a camera:
+  screenshot, demo video, launch post. All three are marked unticked with reasons in PLAN.md section 6
+  rather than quietly claimed.
