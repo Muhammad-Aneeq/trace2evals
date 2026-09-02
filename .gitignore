@@ -1,0 +1,34 @@
+# python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# t2e local state (local-first: the DB never leaves the machine)
+.t2e/
+*.db
+*.sqlite
+*.sqlite3
+
+# built SPA assets (produced by `npm run build`)
+backend/src/t2e/web/
+
+# node
+node_modules/
+frontend/dist/
+npm-debug.log*
+
+# exports produced by ad-hoc runs (evals/ artifacts ARE committed)
+exports/
+
+# os / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
