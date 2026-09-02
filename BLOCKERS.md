@@ -28,6 +28,35 @@ shipped so downstream work continued. Nothing here silently stopped work.
 
 ---
 
+## B-003 - No browser available to verify the UI interactively
+
+- **What:** After building the SPA and serving it with `t2e label --serve`, I tried to drive the real UI
+  in Chrome to confirm the keyboard flow behaves outside jsdom. The browser automation extension
+  reported "Browser extension is not connected", so no interactive click/keypress verification against a
+  real rendering engine was possible.
+- **Tried:** `tabs_context_mcp{createIfEmpty: true}` - returned the not-connected error. Playwright was
+  already ruled out for a different reason (D-004: it downloads browsers at test time, which conflicts
+  with the offline requirement), so there was no second automation path available.
+- **Needed to resolve:** A connected Chrome extension session, or a one-off `npx playwright install
+  chromium` on a machine where the network cost is acceptable, then a short scripted session.
+- **Workaround shipped:** Three layers of verification that do not need a browser:
+  1. **13 component tests** (Vitest + React Testing Library, jsdom) drive the real `LabelerPage`
+     component through keystrokes: `W`/`1`/`2`/`Enter` produces the correct request body, committing
+     auto-advances to the next run, `X` expands a payload, `J`/`K` moves the cursor, typing in the note
+     field does not fire verdicts, and commit is refused without a verdict.
+  2. **36 API tests** plus a scripted 20-run session test cover every endpoint and the queue mechanics.
+  3. **Live HTTP checks** against a running `t2e label --serve`: `/`, `/runs`, `/label`, `/label/<id>` and
+     `/import` all return the SPA shell (so client-side deep links work), both built assets are served,
+     the JS bundle contains the expected UI strings, and a label posted over real HTTP advanced the queue
+     and moved the median stat.
+- **Affected PLAN.md tasks:** none blocked - the Phase 2 UI tasks are delivered and tested.
+- **Impact on claims:** The UI is verified by component tests and live HTTP, **not** by a human or a
+  script clicking through a real browser. No screenshot is included in the README for the same reason.
+  Visual rendering (Tailwind output, the frosted-glass look, layout at real viewport sizes) is therefore
+  unverified. Stated in the README STATUS section.
+
+---
+
 ## B-002 - `make` is not installed on the build machine
 
 - **What:** Spec 00 A1 and the definition of done require a `Makefile` and a working `make dev`.

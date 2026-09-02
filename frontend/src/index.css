@@ -1,0 +1,59 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Fonts are not loaded from a CDN: this tool must run fully offline (spec 03 sec 11).
+   Space Grotesk / Inter are used when present on the machine, otherwise the system stack. */
+
+@layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  body {
+    @apply bg-navy-950 text-slate-200 font-sans antialiased;
+    background-image:
+      radial-gradient(60rem 40rem at 15% -10%, rgba(16, 185, 129, 0.09), transparent 60%),
+      radial-gradient(50rem 35rem at 100% 0%, rgba(37, 73, 126, 0.35), transparent 55%);
+    background-attachment: fixed;
+  }
+
+  h1,
+  h2,
+  h3 {
+    @apply font-display tracking-tight text-slate-100;
+  }
+
+  /* Keyboard users are the primary users here, so focus must always be obvious. */
+  :focus-visible {
+    @apply outline-none ring-2 ring-emerald-500/70 ring-offset-2 ring-offset-navy-950;
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply rounded-full bg-navy-700;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+}
+
+@layer components {
+  /* The frosted-glass surface from spec 00 A2. */
+  .glass {
+    @apply border border-white/10 bg-white/[0.04] shadow-glass backdrop-blur-[14px];
+  }
+
+  .kbd {
+    @apply inline-flex min-w-[1.6rem] items-center justify-center rounded border border-white/20
+      bg-white/10 px-1.5 py-0.5 font-mono text-[0.7rem] font-medium text-slate-200;
+  }
+
+  .payload {
+    @apply max-h-72 overflow-auto whitespace-pre-wrap break-words rounded-lg bg-navy-950/70
+      p-3 font-mono text-xs leading-relaxed text-slate-300;
+  }
+}

@@ -95,3 +95,56 @@ not things that were intended.
 
 **Next**
 - Phase 2: FastAPI routes, the aurora components, and the keyboard labeling flow with session stats.
+
+---
+
+## Phase 2 - Labeling UI + keyboard flow + session stats
+
+**Status:** complete
+
+**Done**
+- `stats.py`: verdict and failure-tag distribution, median/mean/fastest/slowest seconds per label, a
+  30-minute-gap session window, and a plain-text renderer for CI.
+- FastAPI layer: every endpoint in spec 03 sec 7, plus three additions recorded as D-014
+  (`next-unlabeled`, label deletion for undo, and a served taxonomy). The app factory mounts the built
+  SPA from inside the Python package, so `t2e label --serve` is one process.
+- Aurora components in `frontend/src/components/aurora/` using the spec 00 A2 tokens (navy `#0B1E3B`,
+  emerald `#10B981`, frosted glass): Card, StatBadge, MetricTile, ConfidencePill, RiskTag, EmptyState,
+  SyntheticDataBanner, TraceTimeline and VerdictBar, all behind one import line.
+- Five screens: Import (dropzone + per-file parse report + PII banner), Runs (all four F3 filters,
+  verdict pills, tag chips, unlabeled counter), Labeler, and honest Phase-3 placeholders for Cases and
+  Export.
+- The keyboard flow: `R`/`W`/`P` verdicts, `1`-`7` tags, `J`/`K` step cursor, `X` expand payload, `N`
+  note, `Enter` commit, `S` skip, `U` undo, `?` help. Keystrokes are suppressed while typing in a field
+  and modifier combinations pass through to the browser.
+- Live session stats on screen while labeling (labels done, median seconds, last label, remaining), with
+  the median also persisted server-side so `t2e stats` reports measured data.
+- `t2e import` and `t2e label --serve` fully wired, including the CLI's PII warning.
+
+**Verified by running**
+- `uv run pytest` - **171 passed** (36 API tests, a scripted 20-run session test, plus Phase 1's suite).
+- `npm run typecheck` - clean under `strict` with `noUncheckedIndexedAccess`.
+- `npm test` - **13 passed**: the component-level labeling flow (D-004), driving the real `LabelerPage`
+  through keystrokes and asserting the request body, auto-advance, payload expansion, cursor movement,
+  and that typing in the note field does not fire verdicts.
+- `npm run build` - clean; 240 kB JS / 18.7 kB CSS into `backend/src/t2e/web/`.
+- **End-to-end against a live server**, not just the test client: `t2e import fixtures/otel
+  fixtures/langsmith` imported 16 runs with 10 reported record errors and 5 redactions; `t2e label
+  --serve` came up with `ui_built: true`; `/`, `/runs`, `/label`, `/label/<id>` and `/import` all served
+  the SPA shell (client-side deep links work); both assets served; a label posted over real HTTP
+  returned the next run for auto-advance, decremented the unlabeled count, and moved the median stat.
+  The PII fixture served through the API contains `[REDACTED:email]` and no raw address.
+
+**Measurements**
+- Median label round trip through the API: **well under 0.5s** (asserted in
+  `tests/test_labeling_session.py`), so the tool contributes almost nothing to the 10s human budget.
+- The scripted 20-run session drains the queue with no repeats and no skips, and is resumable mid-session.
+
+**Blocked / not verified**
+- **B-003**: the browser automation extension was not connected, so the UI has not been driven in a real
+  browser. Component tests and live HTTP checks cover behaviour; visual rendering is unverified, which is
+  also why the README ships without a screenshot.
+
+**Next**
+- Phase 3: the 5 assertion kinds, the case builder with label-derived defaults, the three exporters with
+  golden files, and `t2e export` / `t2e stats`.

@@ -216,20 +216,24 @@ Acceptance criteria quoted from spec:
 
 > Speed is the feature: **target <10s median per simple label; measure and show session stats.** (spec 03 sec 9)
 
-- [ ] `api/routes.py`: `POST /api/import`, `GET /api/runs?filters`, `GET /api/runs/{id}`,
-      `POST /api/runs/{id}/label`, `GET /api/stats` (spec 03 sec 7)
-- [ ] `api/app.py`: app factory + static SPA mount + dev CORS
-- [ ] Frontend scaffold: vite + react + ts + tailwind with aurora tokens
-- [ ] `components/aurora/*`: Card, StatBadge, MetricTile, ConfidencePill, RiskTag, TraceTimeline,
+- [x] `api/routes.py`: `POST /api/import`, `GET /api/runs?filters`, `GET /api/runs/{id}`,
+      `POST /api/runs/{id}/label`, `GET /api/stats` (spec 03 sec 7), plus `GET /api/runs/next-unlabeled`,
+      `DELETE /api/runs/{id}/label` (undo) and `GET /api/taxonomy` - see D-014
+- [x] `api/app.py`: app factory + static SPA mount + dev CORS
+- [x] `stats.py`: verdict/tag distribution, median seconds per label, CI-friendly text rendering
+- [x] Frontend scaffold: vite + react + ts + tailwind with aurora tokens
+- [x] `components/aurora/*`: Card, StatBadge, MetricTile, ConfidencePill, RiskTag, TraceTimeline,
       EmptyState, SyntheticDataBanner, VerdictBar (adaptation 1: built locally, spec 00 A2 tokens)
-- [ ] `ImportPage`: dropzone + per-file parse report
-- [ ] `RunsPage`: table with verdict pills, tag chips, unlabeled counter, all four filters
-- [ ] `LabelerPage`: TraceTimeline centre, VerdictBar bottom, keyboard legend, payload expanders
-- [ ] `useHotkeys`: R/W/P verdicts, 1-7 failure tags, J/K navigate, Enter commit, ? legend
-- [ ] `useSessionStats`: per-label elapsed -> labels done + median seconds, displayed live
-- [ ] Auto-advance to next unlabeled after commit
-- [ ] Tests: API endpoint tests; component-level labeling flow test (D-004); timed scripted session
-- [ ] Commit: "Phase 2: labeling UI, keyboard flow, session stats"
+- [x] `ImportPage`: dropzone + per-file parse report
+- [x] `RunsPage`: table with verdict pills, tag chips, unlabeled counter, all four filters
+- [x] `LabelerPage`: TraceTimeline centre, VerdictBar bottom, keyboard legend, payload expanders
+- [x] `useHotkeys`: R/W/P verdicts, 1-7 failure tags, J/K navigate, X expand, N note, Enter commit,
+      S skip, U undo, ? legend
+- [x] `useSessionStats`: per-label elapsed -> labels done + median seconds, displayed live
+- [x] Auto-advance to next unlabeled after commit (`next_run_id` rides the label response)
+- [x] Tests: 36 API endpoint tests; 13 component-level labeling flow tests (D-004); timed 20-run session
+- [x] `t2e import` and `t2e label --serve` wired and verified against a live server
+- [x] Commit: "Phase 2: labeling UI, keyboard flow, session stats"
 
 **Test plan:** `test_api.py` exercises each endpoint incl. filter combinations. Frontend flow test
 (Vitest + React Testing Library) simulates keypress -> verdict posted -> advanced to next unlabeled.
@@ -373,6 +377,15 @@ Append-only. Every deviation from spec or judgment call, with one line of reason
 - **D-012** The import pipeline lives in `ingest.py`, not in `parsers/__init__.py` as the file map first
   had it -> keeps `t2e.parsers` a pure registry of format readers and gives the CLI and the API one
   shared definition of "import this file".
+- **D-014** Added three endpoints beyond spec 03 sec 7: `GET /api/runs/next-unlabeled` (the labeler needs
+  the next run's full detail to auto-advance), `DELETE /api/runs/{id}/label` (a fast keyboard flow will
+  mislabel something, so undo is a correctness feature, not a nicety), and `GET /api/taxonomy` (so the UI
+  never hard-codes a vocabulary that could drift from the server).
+- **D-015** The label response carries `next_run_id` rather than making the client ask for it -> auto-
+  advance must not cost a second round trip, because that latency lands directly in the <10s median claim.
+- **D-016** `outcome.error` is populated only when the run's status is `error`; a run that recovered from
+  a failing step stays `success` -> a record marked "success" while carrying an error string is incoherent
+  to label against. The step keeps its own error, and `meta.n_step_errors` still surfaces it.
 - **D-013** SQLite drops `tzinfo`, so datetime columns use a `UtcDateTime` type decorator that stores
   naive UTC and returns UTC-aware -> without it a run reloaded from disk compares unequal to the one
   written, which broke a round-trip test and would have corrupted exported timestamps.
