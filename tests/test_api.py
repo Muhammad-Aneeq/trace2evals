@@ -388,10 +388,10 @@ def test_stats_on_an_empty_store(client):
     assert body["meets_speed_target"] is None
 
 
-# --- Phase 3 endpoints are declared but honest about being unimplemented ------------------------
+# --- case and export endpoints are live (covered in depth in test_api_cases.py) -----------------
 
 
-def test_case_and_export_endpoints_report_not_implemented(client):
-    assert client.post("/api/cases", json={}).status_code == 501
-    assert client.get("/api/cases").status_code == 501
-    assert client.post("/api/export", json={}).status_code == 501
+def test_case_and_export_endpoints_are_implemented(client):
+    assert client.get("/api/cases").status_code == 200
+    # An export with nothing to export is a 404, not a silent empty file.
+    assert client.post("/api/export", json={"version": "v1"}).status_code == 404

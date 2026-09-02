@@ -17,6 +17,11 @@ FIXTURES_DIR = REPO_ROOT / "fixtures"
 SNAPSHOT_DIR = Path(__file__).parent / "snapshots"
 GOLDEN_DIR = Path(__file__).parent / "golden"
 
+#: `tests/golden/test_cases.py` is a *generated artefact* that happens to look like a test module, so
+#: pytest would otherwise collect and run it - against an agent adapter that does not exist here.
+#: It is exercised properly, in a temp directory with a fake adapter, by test_generated_pytest_stub.py.
+collect_ignore_glob = ["golden/*"]
+
 
 def pytest_addoption(parser: pytest.Parser) -> None:
     parser.addoption(

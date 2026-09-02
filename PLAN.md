@@ -260,18 +260,21 @@ Acceptance criteria quoted from spec:
 
 > Over-building the assertion language -> **v1 = 5 assertion kinds max** (spec 03 sec 14)
 
-- [ ] `assertions.py`: exactly 5 kinds - `must_call_tool`, `must_escalate`, `must_cite`,
+- [x] `assertions.py`: exactly 5 kinds - `must_call_tool`, `must_escalate`, `must_cite`,
       `output_matches_regex`, `output_matches_schema` - with evaluation logic + public helpers
-- [ ] Defaults engine: derive pre-filled assertions from verdict + failure tags
-      (e.g. `wrong_tool` -> `must_call_tool`, `no_escalation` -> `must_escalate`, `ungrounded` -> `must_cite`)
-- [ ] `POST /api/cases` (from run | manual), `GET /api/cases?version`, `POST /api/export {version, format}`
-- [ ] `CasesPage` expectation editor with assertion pickers; `ExportPage` version notes + format checkboxes
-- [ ] `exporters/cases_jsonl.py` + `docs/cases_schema.md`
-- [ ] `exporters/pytest_stub.py`: generated `test_cases.py` importing `t2e.assertions` helpers
-- [ ] `exporters/promptfoo.py`
-- [ ] `cli.py`: all four commands; `stats` prints CI-friendly output and a non-zero exit on empty dataset
-- [ ] Golden files + tests; generated stub is executed by pytest to prove it runs
-- [ ] Commit: "Phase 3: case builder, exports, pytest stub, CLI"
+- [x] Defaults engine (`casebuilder.py`): derive pre-filled assertions from verdict + failure tags
+      (`wrong_tool`/`bad_args` -> `must_call_tool`, `no_escalation` -> `must_escalate`,
+      `ungrounded`/`hallucinated_fact` -> `must_cite`, `format_break` -> `output_matches_regex`);
+      a `right` verdict proposes regression guards instead
+- [x] `POST /api/cases` (from run | manual), `GET /api/cases?version`, `POST /api/export {version, format}`,
+      plus `GET /api/cases/suggest/{run_id}`, `PATCH`/`DELETE /api/cases/{id}` for the editor
+- [x] `CasesPage` expectation editor with assertion pickers; `ExportPage` version notes + format checkboxes
+- [x] `exporters/cases_jsonl.py` + `docs/cases_schema.md`
+- [x] `exporters/pytest_stub.py`: generated `test_cases.py` importing `t2e.assertions` helpers
+- [x] `exporters/promptfoo.py` (with its own weaknesses stated in the generated file)
+- [x] `cli.py`: all four commands; `stats` prints CI-friendly output and a non-zero exit on empty dataset
+- [x] Golden files + tests; generated stub is executed by pytest to prove it runs
+- [x] Commit: "Phase 3: case builder, exports, pytest stub, CLI"
 
 **Test plan:** `test_assertions.py` covers pass and fail for each of the 5 kinds.
 `test_exports_golden.py` byte-compares all three export formats against `tests/golden/`.
@@ -377,6 +380,20 @@ Append-only. Every deviation from spec or judgment call, with one line of reason
 - **D-012** The import pipeline lives in `ingest.py`, not in `parsers/__init__.py` as the file map first
   had it -> keeps `t2e.parsers` a pure registry of format readers and gives the CLI and the API one
   shared definition of "import this file".
+- **D-017** `output_matches_schema` implements a small JSON Schema subset in-tree rather than depending
+  on `jsonschema` -> keeps the zero-runtime-dependency promise so a user can vendor `t2e.assertions`.
+  Unsupported keywords **fail the assertion with an explicit message** rather than being ignored: an
+  assertion that quietly checks less than it appears to is worse than one that fails.
+- **D-018** ruff `line-length` raised from 100 to 110, and `tests/golden/` excluded from lint -> every
+  violation at 100 was explanatory prose in the 101-109 range, and reflowing it to fit an arbitrary
+  width made it read worse. Generated artefacts are not source and should not be held to source style.
+- **D-019** `tests/golden/test_cases.py` is excluded from pytest collection via `collect_ignore_glob`
+  -> the golden artefact *is* a pytest module, so pytest collected and ran it against an agent adapter
+  that does not exist, erroring on 6 tests. It is exercised properly, in a temp directory with a fake
+  adapter, by `test_generated_pytest_stub.py`. This would have broken `make test` for any user.
+- **D-020** The generated pytest stub requires a user-supplied `run_agent` fixture and skips/errors
+  loudly without one, rather than defaulting to something that passes -> a generated suite that goes
+  green without an agent wired in is actively harmful in CI.
 - **D-014** Added three endpoints beyond spec 03 sec 7: `GET /api/runs/next-unlabeled` (the labeler needs
   the next run's full detail to auto-advance), `DELETE /api/runs/{id}/label` (a fast keyboard flow will
   mislabel something, so undo is a correctness feature, not a nicety), and `GET /api/taxonomy` (so the UI

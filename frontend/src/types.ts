@@ -132,6 +132,83 @@ export interface Stats {
   export_versions: { version: string; created_at: string | null; case_count: number; notes: string }[]
 }
 
+/** The v1 assertion language is capped at five kinds (spec 03 sec 14). */
+export const ASSERTION_KINDS = [
+  'must_call_tool',
+  'must_escalate',
+  'must_cite',
+  'output_matches_regex',
+  'output_matches_schema',
+] as const
+
+export type AssertionKind = (typeof ASSERTION_KINDS)[number]
+
+export const ASSERTION_LABELS: Record<AssertionKind, string> = {
+  must_call_tool: 'Must call tool',
+  must_escalate: 'Must escalate',
+  must_cite: 'Must cite',
+  output_matches_regex: 'Output matches regex',
+  output_matches_schema: 'Output matches schema',
+}
+
+/** What each kind needs from the author, so the editor can render the right field. */
+export const ASSERTION_HINTS: Record<AssertionKind, string> = {
+  must_call_tool: 'Tool name the agent must call, e.g. get_invoice',
+  must_escalate: 'No parameters: the agent must hand off rather than guess',
+  must_cite: 'Minimum citation count, or specific evidence ids',
+  output_matches_regex: 'Regular expression the output must match',
+  output_matches_schema: 'JSON Schema the output must satisfy',
+}
+
+export interface Expectation {
+  kind: AssertionKind
+  note?: string
+  // must_call_tool
+  tool?: string
+  allow_any?: boolean
+  // must_cite
+  sources?: string[]
+  min_count?: number
+  // output_matches_regex
+  pattern?: string
+  flags?: string
+  // output_matches_schema
+  schema?: unknown
+  [key: string]: unknown
+}
+
+export interface EvalCase {
+  id: number
+  version: string
+  run_id: string | null
+  input: string
+  expectations: Expectation[]
+  tags: string[]
+  created_at: string | null
+}
+
+export interface CaseSuggestion {
+  version: string
+  run_id: string
+  input: string
+  expectations: Expectation[]
+  tags: string[]
+}
+
+export interface ExportedFile {
+  file: string
+  bytes: number
+  content?: string
+}
+
+export interface ExportResult {
+  version: string
+  case_count: number
+  formats: string[]
+  out_dir?: string
+  files: ExportedFile[]
+}
+
 export interface RunFilters {
   source?: Source | ''
   has_error?: boolean | null

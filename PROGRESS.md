@@ -148,3 +148,53 @@ not things that were intended.
 **Next**
 - Phase 3: the 5 assertion kinds, the case builder with label-derived defaults, the three exporters with
   golden files, and `t2e export` / `t2e stats`.
+
+---
+
+## Phase 3 - Case builder + exports + pytest stub + CLI
+
+**Status:** complete
+
+**Done**
+- `assertions.py`: exactly five kinds, no sixth. Each is a pure function over an `AgentRun` that a
+  user's adapter returns (a string, a dict, or the dataclass all work). `must_escalate` has documented
+  signal precedence (explicit flag > escalation tool call > output keywords) because text matching is
+  the weakest evidence. `output_matches_schema` implements a JSON Schema subset in-tree (D-017) and
+  fails loudly on an unsupported keyword rather than silently checking less.
+- `casebuilder.py`: the tag -> assertion mapping that makes spec 03 F4's "sensible defaults pre-filled
+  from labels" real. A failing tool call is used to guess *which* tool a `wrong_tool` case should
+  require; `hallucinated_fact` pins the evidence ids the run actually produced; a `right` verdict
+  proposes regression guards instead. Every proposal carries a `note` saying why it is there.
+- Three exporters: `cases.jsonl` (sorted keys, LF, pinned `schema_version`), the generated
+  `test_cases.py`, and Promptfoo YAML that states its own weaknesses in its header.
+- Case and export endpoints, including `suggest`, `PATCH` and `DELETE` for the editor.
+- `CasesPage` with assertion pickers per kind, and `ExportPage` with format checkboxes and in-browser
+  blob downloads (nothing is uploaded to produce a file).
+- `t2e export` and `t2e stats` finished; `docs/cases_schema.md` documents the export contract.
+
+**Verified by running**
+- `uv run pytest` - **305 passed**: 40 assertion tests, 21 case-builder tests, 22 export golden tests,
+  21 case/export API tests, 22 CLI tests, and 8 tests that run the generated suite.
+- **The generated stub really runs.** With a correct adapter, `pytest` on the generated directory
+  reports **12 passed**; with a deliberately broken adapter it fails and names all five assertion
+  kinds; with no adapter it errors on the missing fixture instead of passing vacuously; with an empty
+  cases file it refuses to run; with a foreign `schema_version` it demands a re-export.
+- `uv run ruff check .` - All checks passed. `npm run typecheck` / `npm test` (13) / `npm run build` -
+  all clean.
+- **End-to-end at the CLI**: `t2e import` (16 runs) -> label -> build cases -> `t2e export --version v1
+  --format jsonl,pytest,promptfoo` wrote all three files -> `t2e stats` reported the distribution and a
+  6.15s median. Exit codes verified: 0 on success, 1 for an unknown version, 2 for a bad format.
+
+**Bugs found and fixed while testing**
+- `tests/golden/test_cases.py` was being **collected and run by pytest** (6 errors), because the golden
+  artefact is itself a pytest module. Fixed with `collect_ignore_glob` (D-019). This would have broken
+  `make test` for anyone who cloned the repo.
+- An unused `Body` import and an unsorted import block in `routes.py`.
+
+**Measurements**
+- Export sizes for a 2-case v1 suite: `cases.jsonl` 1,180 bytes, `test_cases.py` 3,619 bytes,
+  `promptfooconfig.yaml` 2,129 bytes.
+
+**Next**
+- Phase 4: dogfood the fixtures through the tool, then README, Makefile, CI, docker-compose and
+  FINAL_REPORT.

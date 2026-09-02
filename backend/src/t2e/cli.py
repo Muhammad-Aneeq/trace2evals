@@ -105,6 +105,7 @@ def build_parser() -> argparse.ArgumentParser:
         "--out", metavar="DIR", default="exports", help="output directory (default: exports/)"
     )
     p_export.add_argument("--notes", default="", help="notes recorded against the export version")
+    p_export.add_argument("--json", action="store_true", help="emit the export manifest as JSON")
 
     # t2e stats
     p_stats = sub.add_parser(

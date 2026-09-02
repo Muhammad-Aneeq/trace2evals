@@ -44,9 +44,13 @@ pythonpath = ["backend/src"]
 addopts = "-q"
 
 [tool.ruff]
-line-length = 100
+# 110 rather than 100: the only violations at 100 were explanatory docstrings and comments in the
+# 101-109 range, and reflowing prose to fit an arbitrary width made it read worse. See PLAN.md D-018.
+line-length = 110
 src = ["backend/src", "tests"]
 target-version = "py312"
+# Generated artefacts are not source and must not be held to source style.
+extend-exclude = ["tests/golden", "backend/src/t2e/web"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]

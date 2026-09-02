@@ -1,6 +1,10 @@
 /** Typed fetch client. Same-origin only: this UI never talks to anything but the local server. */
 
 import type {
+  CaseSuggestion,
+  EvalCase,
+  Expectation,
+  ExportResult,
   LabelRequest,
   LabelResponse,
   ParseReport,
@@ -94,5 +98,52 @@ export const api = {
 
   getStats(): Promise<Stats> {
     return request<Stats>('/api/stats')
+  },
+
+  // --- cases ---
+
+  suggestCase(runId: string): Promise<CaseSuggestion> {
+    return request<CaseSuggestion>(`/api/cases/suggest/${encodeURIComponent(runId)}`)
+  },
+
+  listCases(version?: string): Promise<EvalCase[]> {
+    const query = version ? `?version=${encodeURIComponent(version)}` : ''
+    return request<EvalCase[]>(`/api/cases${query}`)
+  },
+
+  createCase(body: {
+    version: string
+    run_id?: string | null
+    input?: string
+    expectations?: Expectation[]
+    tags?: string[]
+  }): Promise<EvalCase> {
+    return request<EvalCase>('/api/cases', { method: 'POST', body: JSON.stringify(body) })
+  },
+
+  updateCase(
+    caseId: number,
+    body: { version: string; input?: string; expectations?: Expectation[]; tags?: string[] },
+  ): Promise<EvalCase> {
+    return request<EvalCase>(`/api/cases/${caseId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(body),
+    })
+  },
+
+  deleteCase(caseId: number): Promise<void> {
+    return request<void>(`/api/cases/${caseId}`, { method: 'DELETE' })
+  },
+
+  // --- export ---
+
+  exportCases(body: {
+    version: string
+    format: string
+    notes?: string
+    write_to_disk?: boolean
+    out_dir?: string
+  }): Promise<ExportResult> {
+    return request<ExportResult>('/api/export', { method: 'POST', body: JSON.stringify(body) })
   },
 }

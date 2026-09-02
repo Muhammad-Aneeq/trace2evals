@@ -139,13 +139,52 @@ def cmd_label(args: argparse.Namespace) -> int:
     return EXIT_OK
 
 
-# --- export / stats (Phase 3) -------------------------------------------------------------------
+# --- export -------------------------------------------------------------------------------------
 
 
 def cmd_export(args: argparse.Namespace) -> int:
     _apply_db_override(args)
-    print("t2e export: exporters land in Phase 3 - see PLAN.md", file=sys.stderr)
-    return 70
+    from t2e import exporters
+
+    try:
+        formats = exporters.parse_formats(args.format)
+    except ValueError as exc:
+        print(f"t2e export: {exc}", file=sys.stderr)
+        return EXIT_USAGE
+
+    with store.session_scope() as session:
+        cases = store.list_cases(session, version=args.case_version)
+        if not cases:
+            available = sorted({row.version for row in store.list_cases(session)})
+            print(
+                f"t2e export: no cases at version {args.case_version!r}."
+                + (f" Available: {', '.join(available)}" if available else " No cases exist yet."),
+                file=sys.stderr,
+            )
+            return EXIT_FAIL
+
+        result = exporters.write(
+            cases, version=args.case_version, formats=formats, out_dir=args.out
+        )
+        store.record_export_version(
+            session,
+            version=args.case_version,
+            case_count=len(cases),
+            notes=args.notes,
+        )
+
+    if args.json:
+        print(json.dumps(result, indent=2))
+    else:
+        print(f"exported {result['case_count']} case(s) at {args.case_version} -> {result['out_dir']}")
+        for entry in result["files"]:
+            print(f"  {entry['file']}  ({entry['bytes']} bytes)")
+        if "pytest" in formats:
+            print()
+            print("the generated suite needs an agent adapter before it can run:")
+            print("  see the docstring at the top of test_cases.py for the conftest.py to add")
+
+    return EXIT_OK
 
 
 def cmd_stats(args: argparse.Namespace) -> int:

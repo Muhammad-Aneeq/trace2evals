@@ -11,13 +11,13 @@ from __future__ import annotations
 
 from typing import Annotated, Any, Literal
 
-from fastapi import APIRouter, Body, File, HTTPException, Query, UploadFile
+from fastapi import APIRouter, File, HTTPException, Query, UploadFile
 from pydantic import BaseModel, ConfigDict, Field
 
+from t2e import casebuilder, exporters, store
 from t2e import stats as stats_module
-from t2e import store
 from t2e.ingest import ingest_text
-from t2e.models import Run
+from t2e.models import Case, Run
 from t2e.schemas import ASSERTION_KINDS, FAILURE_TAGS, ParseReport
 
 router = APIRouter(prefix="/api")
@@ -284,19 +284,205 @@ def get_stats() -> dict[str, Any]:
         return stats_module.collect(session).to_dict()
 
 
-# --- cases / export (filled in by Phase 3) ------------------------------------------------------
+# --- cases --------------------------------------------------------------------------------------
 
 
-@router.post("/cases", status_code=501)
-def create_case(payload: Annotated[dict[str, Any], Body()]) -> dict[str, Any]:
-    raise HTTPException(status_code=501, detail="case builder lands in Phase 3; see PLAN.md")
+class CaseOut(BaseModel):
+    id: int
+    version: str
+    run_id: str | None
+    input: Any
+    expectations: list[dict[str, Any]]
+    tags: list[str]
+    created_at: str | None
 
 
-@router.get("/cases", status_code=501)
-def list_cases(version: Annotated[str | None, Query()] = None) -> dict[str, Any]:
-    raise HTTPException(status_code=501, detail="case builder lands in Phase 3; see PLAN.md")
+class CaseCreate(BaseModel):
+    """Create a case from a labeled run, or by hand. `run_id` NULL is the manual path (spec 03 F4)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    version: str = "v1"
+    run_id: str | None = None
+    #: Omitted when building from a run: the run's input is used.
+    input: Any = None
+    #: Omitted when building from a run: defaults are derived from the label.
+    expectations: list[dict[str, Any]] | None = None
+    tags: list[str] | None = None
+
+    def validated_expectations(self) -> list[dict[str, Any]] | None:
+        if self.expectations is None:
+            return None
+        unknown = sorted(
+            {
+                str(item.get("kind"))
+                for item in self.expectations
+                if item.get("kind") not in ASSERTION_KINDS
+            }
+        )
+        if unknown:
+            raise HTTPException(
+                status_code=422,
+                detail=f"unknown assertion kind(s): {', '.join(unknown)}. "
+                f"v1 supports exactly five: {', '.join(ASSERTION_KINDS)}",
+            )
+        return self.expectations
 
 
-@router.post("/export", status_code=501)
-def export(payload: Annotated[dict[str, Any], Body()]) -> dict[str, Any]:
-    raise HTTPException(status_code=501, detail="exporters land in Phase 3; see PLAN.md")
+def _case_out(row: Case) -> CaseOut:
+    return CaseOut(
+        id=row.id,
+        version=row.version,
+        run_id=row.run_id,
+        input=store.loads(row.input_json, ""),
+        expectations=store.loads(row.expectations_json, []) or [],
+        tags=store.loads(row.tags_json, []) or [],
+        created_at=row.created_at.isoformat() if row.created_at else None,
+    )
+
+
+@router.get("/cases/suggest/{run_id}")
+def suggest_case(run_id: str) -> dict[str, Any]:
+    """The pre-filled case for a run, so the editor opens with defaults rather than blank fields."""
+    with store.session_scope() as session:
+        row = store.get_run(session, run_id)
+        if row is None:
+            raise HTTPException(status_code=404, detail=f"no run with id {run_id!r}")
+        label = row.label
+        run = store.run_row_to_trace_run(row)
+        return casebuilder.build_case_payload(
+            run,
+            verdict=label.verdict if label else None,
+            tags=(store.loads(label.tags_json, []) if label else []) or [],
+            version="v1",
+        )
+
+
+@router.post("/cases", response_model=CaseOut, status_code=201)
+def create_case(payload: CaseCreate) -> CaseOut:
+    expectations = payload.validated_expectations()
+
+    with store.session_scope() as session:
+        case_input = payload.input
+        tags = payload.tags
+
+        if payload.run_id:
+            row = store.get_run(session, payload.run_id)
+            if row is None:
+                raise HTTPException(status_code=404, detail=f"no run with id {payload.run_id!r}")
+            run = store.run_row_to_trace_run(row)
+            label = row.label
+            label_tags = (store.loads(label.tags_json, []) if label else []) or []
+
+            # Anything the caller omitted is filled from the label (spec 03 F4).
+            if case_input is None:
+                case_input = run.input
+            if expectations is None:
+                expectations = casebuilder.suggest_expectations(
+                    run, label.verdict if label else None, label_tags
+                )
+            if tags is None:
+                tags = casebuilder.suggest_tags(run, label_tags)
+        elif case_input is None:
+            raise HTTPException(
+                status_code=422, detail="a manual case (no run_id) needs an `input`"
+            )
+
+        created = store.create_case(
+            session,
+            version=payload.version,
+            run_id=payload.run_id,
+            input_value=case_input,
+            expectations=expectations or [],
+            tags=tags or [],
+        )
+        return _case_out(created)
+
+
+@router.get("/cases", response_model=list[CaseOut])
+def list_cases(version: Annotated[str | None, Query()] = None) -> list[CaseOut]:
+    with store.session_scope() as session:
+        return [_case_out(row) for row in store.list_cases(session, version=version)]
+
+
+@router.patch("/cases/{case_id}", response_model=CaseOut)
+def update_case(case_id: int, payload: CaseCreate) -> CaseOut:
+    """Edit a case's expectations, tags or input. The editor is the point of the Cases screen."""
+    expectations = payload.validated_expectations()
+
+    with store.session_scope() as session:
+        row = store.get_case(session, case_id)
+        if row is None:
+            raise HTTPException(status_code=404, detail=f"no case with id {case_id}")
+
+        if payload.input is not None:
+            row.input_json = store.dumps(payload.input)
+        if expectations is not None:
+            row.expectations_json = store.dumps(expectations)
+        if payload.tags is not None:
+            row.tags_json = store.dumps(payload.tags)
+        row.version = payload.version
+        session.flush()
+        return _case_out(row)
+
+
+@router.delete("/cases/{case_id}", status_code=204)
+def delete_case(case_id: int) -> None:
+    with store.session_scope() as session:
+        if not store.delete_case(session, case_id):
+            raise HTTPException(status_code=404, detail=f"no case with id {case_id}")
+
+
+# --- export -------------------------------------------------------------------------------------
+
+
+class ExportRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    version: str
+    #: Comma-separated: jsonl, pytest, promptfoo.
+    format: str = "jsonl,pytest"
+    notes: str = ""
+    #: When false the files are returned in the response instead of written to disk.
+    write_to_disk: bool = False
+    out_dir: str = "exports"
+
+
+@router.post("/export")
+def export(payload: ExportRequest) -> dict[str, Any]:
+    try:
+        formats = exporters.parse_formats(payload.format)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+    with store.session_scope() as session:
+        cases = store.list_cases(session, version=payload.version)
+        if not cases:
+            raise HTTPException(
+                status_code=404,
+                detail=f"no cases at version {payload.version!r}; build some on the Cases screen first",
+            )
+
+        if payload.write_to_disk:
+            result = exporters.write(
+                cases, version=payload.version, formats=formats, out_dir=payload.out_dir
+            )
+        else:
+            rendered = exporters.render(cases, version=payload.version, formats=formats)
+            result = {
+                "version": payload.version,
+                "case_count": len(cases),
+                "formats": formats,
+                "files": [
+                    {"file": name, "bytes": len(text.encode("utf-8")), "content": text}
+                    for name, text in rendered.items()
+                ],
+            }
+
+        store.record_export_version(
+            session,
+            version=payload.version,
+            case_count=len(cases),
+            notes=payload.notes,
+        )
+        return result
