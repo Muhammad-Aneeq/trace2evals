@@ -66,15 +66,15 @@ export function TraceTimeline({
             />
             <span
               aria-hidden
-              className={`absolute left-2 top-3 h-2.5 w-2.5 rounded-full ring-4 ring-navy-950 ${
-                step.error ? 'bg-rose-400' : 'bg-emerald-400/70'
+              className={`absolute left-2 top-3 h-2.5 w-2.5 rounded-full ring-4 ring-ink-950 ${
+                step.error ? 'bg-rose-400' : 'bg-cyan-400/70'
               }`}
             />
 
             <div
               className={`rounded-xl border transition-colors ${
                 isCursor
-                  ? 'border-emerald-500/50 bg-emerald-500/[0.07] shadow-glow-emerald'
+                  ? 'border-cyan-500/50 bg-cyan-500/[0.07] shadow-glow-cyan'
                   : 'border-white/10 bg-white/[0.03]'
               }`}
             >

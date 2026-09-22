@@ -4,12 +4,12 @@ interface MetricTileProps {
   label: string
   value: ReactNode
   hint?: ReactNode
-  tone?: 'default' | 'emerald' | 'amber' | 'rose'
+  tone?: 'default' | 'accent' | 'amber' | 'rose'
 }
 
 const valueTones = {
   default: 'text-slate-100',
-  emerald: 'text-emerald-300',
+  accent: 'text-cyan-300',
   amber: 'text-amber-300',
   rose: 'text-rose-300',
 } as const

@@ -26,7 +26,7 @@ export function App() {
       <header className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-baseline gap-3">
           <h1 className="font-display text-xl font-semibold tracking-tight text-slate-100">
-            Trace<span className="text-emerald-400">2</span>Evals
+            Trace<span className="text-cyan-400">2</span>Evals
           </h1>
           <p className="hidden text-xs text-slate-400 sm:block">
             your production failures are your best test cases
@@ -38,19 +38,19 @@ export function App() {
           <StatBadge
             label="unlabeled"
             value={stats.data?.runs_unlabeled ?? '—'}
-            tone={stats.data?.runs_unlabeled ? 'amber' : 'emerald'}
+            tone={stats.data?.runs_unlabeled ? 'amber' : 'accent'}
           />
           {stats.data?.median_seconds_per_label != null && (
             <StatBadge
               label="median"
               value={`${stats.data.median_seconds_per_label}s`}
-              tone={stats.data.meets_speed_target ? 'emerald' : 'amber'}
+              tone={stats.data.meets_speed_target ? 'accent' : 'amber'}
               title={`Target: under ${stats.data.target_median_seconds}s per label`}
             />
           )}
           <span
             title="Local-first: no telemetry, no outbound requests, no LLM calls"
-            className="hidden rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-xs text-emerald-300 sm:inline"
+            className="hidden rounded-full border border-cyan-500/30 bg-cyan-500/10 px-2.5 py-1 text-xs text-cyan-300 sm:inline"
           >
             offline
           </span>
@@ -65,7 +65,7 @@ export function App() {
             className={({ isActive }) =>
               `rounded-lg px-3 py-1.5 text-sm transition-colors ${
                 isActive
-                  ? 'bg-emerald-500/15 font-medium text-emerald-200'
+                  ? 'bg-cyan-500/15 font-medium text-cyan-200'
                   : 'text-slate-300 hover:bg-white/5'
               }`
             }

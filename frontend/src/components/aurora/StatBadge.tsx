@@ -3,13 +3,13 @@
 interface StatBadgeProps {
   label: ReactNode
   value: ReactNode
-  tone?: 'default' | 'emerald' | 'amber' | 'rose'
+  tone?: 'default' | 'accent' | 'amber' | 'rose'
   title?: string
 }
 
 const tones = {
   default: 'border-white/10 bg-white/5 text-slate-300',
-  emerald: 'border-emerald-500/40 bg-emerald-500/10 text-emerald-300',
+  accent: 'border-cyan-500/40 bg-cyan-500/10 text-cyan-300',
   amber: 'border-amber-500/40 bg-amber-500/10 text-amber-300',
   rose: 'border-rose-500/40 bg-rose-500/10 text-rose-300',
 } as const

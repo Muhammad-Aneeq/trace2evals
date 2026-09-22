@@ -85,7 +85,7 @@ export function VerdictBar({
             type="button"
             onClick={onCommit}
             disabled={!verdict || busy || (noteRequired && !note.trim())}
-            className="inline-flex items-center gap-2 rounded-lg border border-emerald-500/50 bg-emerald-500/20 px-3 py-1.5 text-sm font-semibold text-emerald-200 transition-colors hover:bg-emerald-500/30 disabled:cursor-not-allowed disabled:opacity-40"
+            className="inline-flex items-center gap-2 rounded-lg border border-cyan-500/50 bg-cyan-500/20 px-3 py-1.5 text-sm font-semibold text-cyan-200 transition-colors hover:bg-cyan-500/30 disabled:cursor-not-allowed disabled:opacity-40"
           >
             <span className="kbd">↵</span>
             {busy ? 'Saving…' : 'Commit & next'}
@@ -140,7 +140,7 @@ export function VerdictBar({
                 ? 'Required for the "other" tag: what went wrong?'
                 : 'Optional note (press N to focus)'
             }
-            className={`w-full rounded-lg border bg-navy-950/60 px-3 py-2 text-sm text-slate-200 placeholder:text-slate-500 ${
+            className={`w-full rounded-lg border bg-ink-950/60 px-3 py-2 text-sm text-slate-200 placeholder:text-slate-500 ${
               noteRequired && !note.trim() ? 'border-amber-500/50' : 'border-white/10'
             }`}
           />

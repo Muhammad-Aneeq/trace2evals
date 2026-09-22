@@ -186,7 +186,7 @@ export function LabelerPage() {
           action={
             <Link
               to={total === 0 ? '/import' : '/runs'}
-              className="rounded-lg border border-emerald-500/40 bg-emerald-500/15 px-3 py-1.5 text-sm text-emerald-200"
+              className="rounded-lg border border-cyan-500/40 bg-cyan-500/15 px-3 py-1.5 text-sm text-cyan-200"
             >
               {total === 0 ? 'Import traces' : 'Review the run list'}
             </Link>
@@ -217,7 +217,7 @@ export function LabelerPage() {
           label="Median / label"
           value={session.medianSeconds === null ? '—' : `${session.medianSeconds}s`}
           hint={`target < ${10}s`}
-          tone={session.meetsTarget === null ? 'default' : session.meetsTarget ? 'emerald' : 'amber'}
+          tone={session.meetsTarget === null ? 'default' : session.meetsTarget ? 'accent' : 'amber'}
         />
         <MetricTile
           label="Last label"
@@ -250,7 +250,7 @@ export function LabelerPage() {
             <StatBadge
               label="outcome"
               value={run.outcome.status}
-              tone={run.outcome.status === 'error' ? 'rose' : 'emerald'}
+              tone={run.outcome.status === 'error' ? 'rose' : 'accent'}
             />
           </>
         }
@@ -258,7 +258,7 @@ export function LabelerPage() {
         <div className="space-y-4 px-5 py-4">
           <div>
             <div className="mb-1 text-[0.7rem] uppercase tracking-wider text-slate-500">Input</div>
-            <p className="whitespace-pre-wrap rounded-lg bg-navy-950/60 p-3 text-sm leading-relaxed text-slate-200">
+            <p className="whitespace-pre-wrap rounded-lg bg-ink-950/60 p-3 text-sm leading-relaxed text-slate-200">
               {run.input || '(no input recorded)'}
             </p>
           </div>
@@ -267,7 +267,7 @@ export function LabelerPage() {
             <div className="mb-1 text-[0.7rem] uppercase tracking-wider text-slate-500">
               Final output
             </div>
-            <p className="whitespace-pre-wrap rounded-lg bg-navy-950/60 p-3 text-sm leading-relaxed text-slate-200">
+            <p className="whitespace-pre-wrap rounded-lg bg-ink-950/60 p-3 text-sm leading-relaxed text-slate-200">
               {run.outcome.output || '(no output recorded)'}
             </p>
             {run.outcome.error && (
@@ -330,7 +330,7 @@ export function LabelerPage() {
               ['?', 'toggle this panel'],
             ].map(([keys, meaning]) => (
               <div key={keys} className="flex items-baseline justify-between gap-4 border-b border-white/5 py-1">
-                <dt className="font-mono text-xs text-emerald-300">{keys}</dt>
+                <dt className="font-mono text-xs text-cyan-300">{keys}</dt>
                 <dd className="text-right text-slate-300">{meaning}</dd>
               </div>
             ))}

@@ -74,7 +74,7 @@ export function ExportPage() {
         {versions.length === 0 ? (
           <EmptyState title="No cases to export yet" icon="->">
             Build cases from your labeled runs first.{' '}
-            <Link to="/cases" className="text-emerald-300 underline decoration-dotted">
+            <Link to="/cases" className="text-cyan-300 underline decoration-dotted">
               Go to Cases
             </Link>
           </EmptyState>
@@ -88,7 +88,7 @@ export function ExportPage() {
                 <select
                   value={version}
                   onChange={(event) => setVersion(event.target.value)}
-                  className="rounded-lg border border-white/10 bg-navy-900/80 px-2.5 py-1.5 font-mono text-sm"
+                  className="rounded-lg border border-white/10 bg-ink-900/80 px-2.5 py-1.5 font-mono text-sm"
                 >
                   {versions.map((item) => (
                     <option key={item} value={item}>
@@ -106,7 +106,7 @@ export function ExportPage() {
                   value={notes}
                   onChange={(event) => setNotes(event.target.value)}
                   placeholder="e.g. first pass over week 33 failures"
-                  className="w-full rounded-lg border border-white/10 bg-navy-950/60 px-3 py-1.5 text-sm"
+                  className="w-full rounded-lg border border-white/10 bg-ink-950/60 px-3 py-1.5 text-sm"
                 />
               </label>
             </div>
@@ -125,7 +125,7 @@ export function ExportPage() {
                       type="checkbox"
                       checked={selected.includes(format.id)}
                       onChange={() => toggle(format.id)}
-                      className="mt-0.5 accent-emerald-500"
+                      className="mt-0.5 accent-cyan-500"
                     />
                     <span>
                       <span className="block font-mono text-sm text-slate-200">{format.label}</span>
@@ -146,7 +146,7 @@ export function ExportPage() {
                 type="button"
                 onClick={() => runExport.mutate()}
                 disabled={selected.length === 0 || caseCount === 0 || runExport.isPending}
-                className="rounded-lg border border-emerald-500/50 bg-emerald-500/20 px-4 py-2 text-sm font-semibold text-emerald-200 disabled:cursor-not-allowed disabled:opacity-40"
+                className="rounded-lg border border-cyan-500/50 bg-cyan-500/20 px-4 py-2 text-sm font-semibold text-cyan-200 disabled:cursor-not-allowed disabled:opacity-40"
               >
                 {runExport.isPending ? 'Generating…' : `Generate ${version}`}
               </button>
@@ -187,7 +187,7 @@ export function ExportPage() {
                       <button
                         type="button"
                         onClick={() => download(file.file, file.content as string)}
-                        className="rounded-md border border-emerald-500/40 bg-emerald-500/15 px-2 py-1 text-xs text-emerald-200"
+                        className="rounded-md border border-cyan-500/40 bg-cyan-500/15 px-2 py-1 text-xs text-cyan-200"
                       >
                         Download
                       </button>
@@ -209,18 +209,18 @@ export function ExportPage() {
       <Card title="What you get">
         <ul className="space-y-1.5 text-sm text-slate-300">
           <li>
-            <code className="font-mono text-emerald-300">cases.jsonl</code> — one JSON object per
+            <code className="font-mono text-cyan-300">cases.jsonl</code> — one JSON object per
             case, with a pinned <code className="font-mono">schema_version</code> so a reader can
             refuse a shape it does not understand.
           </li>
           <li>
-            <code className="font-mono text-emerald-300">test_cases.py</code> — a real pytest file. It
+            <code className="font-mono text-cyan-300">test_cases.py</code> — a real pytest file. It
             imports assertion helpers from <code className="font-mono">t2e.assertions</code> and calls
             a <code className="font-mono">run_agent</code> fixture that you write; until you do, it
             tells you so rather than passing vacuously.
           </li>
           <li>
-            <code className="font-mono text-emerald-300">promptfooconfig.yaml</code> — convenient for
+            <code className="font-mono text-cyan-300">promptfooconfig.yaml</code> — convenient for
             prompt iteration. Two of the five assertion kinds are weaker there, and the generated file
             says so at the top.
           </li>

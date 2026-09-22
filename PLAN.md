@@ -79,7 +79,7 @@ trace2evals/
 │   ├── package.json                 # vite, react, ts, tailwind, tanstack-query, vitest, RTL
 │   ├── vite.config.ts               # build -> backend/src/t2e/web, dev proxy /api -> :8765
 │   ├── tsconfig.json                # strict TS
-│   ├── tailwind.config.js           # aurora tokens (navy #0B1E3B, emerald #10B981)
+│   ├── tailwind.config.js           # aurora tokens (ink #0B0D1F, cyan #22D3EE)
 │   ├── postcss.config.js
 │   ├── index.html
 │   └── src/
@@ -90,7 +90,7 @@ trace2evals/
 │       ├── api.ts                   # typed fetch client for the API surface
 │       ├── components/aurora/
 │       │   ├── index.ts             # single import line (spec 00 A2 acceptance)
-│       │   ├── tokens.ts            # navy/emerald/glass token constants
+│       │   ├── tokens.ts            # ink/accent/glass token constants
 │       │   ├── Card.tsx             # frosted-glass card
 │       │   ├── StatBadge.tsx        # label/value pill
 │       │   ├── MetricTile.tsx       # session-stats tile

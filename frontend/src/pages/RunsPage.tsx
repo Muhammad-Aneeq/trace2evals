@@ -47,7 +47,7 @@ export function RunsPage() {
   const runs = runsQuery.data ?? []
 
   const selectClass =
-    'rounded-lg border border-white/10 bg-navy-900/80 px-2.5 py-1.5 text-sm text-slate-200'
+    'rounded-lg border border-white/10 bg-ink-900/80 px-2.5 py-1.5 text-sm text-slate-200'
 
   return (
     <div className="space-y-4">
@@ -60,12 +60,12 @@ export function RunsPage() {
             <StatBadge
               label="unlabeled"
               value={stats.data?.runs_unlabeled ?? '—'}
-              tone={stats.data?.runs_unlabeled ? 'amber' : 'emerald'}
+              tone={stats.data?.runs_unlabeled ? 'amber' : 'accent'}
             />
             <StatBadge label="total" value={stats.data?.runs_total ?? '—'} />
             <Link
               to="/label"
-              className="rounded-lg border border-emerald-500/50 bg-emerald-500/20 px-3 py-1.5 text-sm font-semibold text-emerald-200"
+              className="rounded-lg border border-cyan-500/50 bg-cyan-500/20 px-3 py-1.5 text-sm font-semibold text-cyan-200"
             >
               Start labeling
             </Link>
@@ -113,7 +113,7 @@ export function RunsPage() {
               type="checkbox"
               checked={errorOnly}
               onChange={(event) => setErrorOnly(event.target.checked)}
-              className="accent-emerald-500"
+              className="accent-cyan-500"
             />
             Has error
           </label>
@@ -123,7 +123,7 @@ export function RunsPage() {
               type="checkbox"
               checked={unlabeledFirst}
               onChange={(event) => setUnlabeledFirst(event.target.checked)}
-              className="accent-emerald-500"
+              className="accent-cyan-500"
             />
             Unlabeled first
           </label>

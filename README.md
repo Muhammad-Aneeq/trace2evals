@@ -53,8 +53,8 @@ flowchart LR
     CLI <--> DB
     DB --> JSONL & PYTEST & PF
 
-    style Outputs fill:#0B1E3B,stroke:#10B981
-    style Core fill:#0B1E3B,stroke:#10B981
+    style Outputs fill:#161A38,stroke:#22D3EE
+    style Core fill:#161A38,stroke:#22D3EE
 ```
 
 The loop: **import → label → build cases → export**. Everything is file-and-local-first; nothing

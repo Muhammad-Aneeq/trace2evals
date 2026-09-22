@@ -57,7 +57,7 @@ export function ImportPage() {
             submit(event.dataTransfer.files)
           }}
           className={`rounded-xl border-2 border-dashed px-6 py-10 text-center transition-colors ${
-            dragging ? 'border-emerald-400/70 bg-emerald-500/10' : 'border-white/15 bg-white/[0.02]'
+            dragging ? 'border-cyan-400/70 bg-cyan-500/10' : 'border-white/15 bg-white/[0.02]'
           }`}
         >
           <p className="text-sm text-slate-300">Drop trace files here</p>
@@ -67,7 +67,7 @@ export function ImportPage() {
           <button
             type="button"
             onClick={() => inputRef.current?.click()}
-            className="mt-4 rounded-lg border border-emerald-500/50 bg-emerald-500/20 px-3 py-1.5 text-sm font-semibold text-emerald-200"
+            className="mt-4 rounded-lg border border-cyan-500/50 bg-cyan-500/20 px-3 py-1.5 text-sm font-semibold text-cyan-200"
           >
             Choose files
           </button>
@@ -88,7 +88,7 @@ export function ImportPage() {
             <select
               value={format}
               onChange={(event) => setFormat(event.target.value)}
-              className="rounded-lg border border-white/10 bg-navy-900/80 px-2.5 py-1.5 text-sm"
+              className="rounded-lg border border-white/10 bg-ink-900/80 px-2.5 py-1.5 text-sm"
             >
               <option value="auto">Auto-detect</option>
               <option value="otel">OpenTelemetry JSON</option>
@@ -101,7 +101,7 @@ export function ImportPage() {
               type="checkbox"
               checked={redact}
               onChange={(event) => setRedact(event.target.checked)}
-              className="accent-emerald-500"
+              className="accent-cyan-500"
             />
             Redact PII-lookalike values on import
           </label>
@@ -135,7 +135,7 @@ export function ImportPage() {
           subtitle={`${reports.length} file(s)`}
           actions={
             <>
-              <StatBadge label="runs" value={totalRuns} tone={totalRuns ? 'emerald' : 'rose'} />
+              <StatBadge label="runs" value={totalRuns} tone={totalRuns ? 'accent' : 'rose'} />
               <StatBadge
                 label="record errors"
                 value={totalErrors}
@@ -145,7 +145,7 @@ export function ImportPage() {
               {totalRuns > 0 && (
                 <Link
                   to="/label"
-                  className="rounded-lg border border-emerald-500/50 bg-emerald-500/20 px-3 py-1.5 text-sm font-semibold text-emerald-200"
+                  className="rounded-lg border border-cyan-500/50 bg-cyan-500/20 px-3 py-1.5 text-sm font-semibold text-cyan-200"
                 >
                   Start labeling
                 </Link>
@@ -165,7 +165,7 @@ export function ImportPage() {
                 </div>
 
                 {report.redactions > 0 && (
-                  <p className="mt-1 text-xs text-emerald-300">
+                  <p className="mt-1 text-xs text-cyan-300">
                     redacted {report.redactions} value(s): {report.pii_flags.join(', ')}
                   </p>
                 )}
@@ -183,7 +183,7 @@ export function ImportPage() {
                     </summary>
                     <ul className="mt-1.5 space-y-1.5">
                       {report.errors.map((error, index) => (
-                        <li key={index} className="rounded-lg bg-navy-950/60 px-3 py-2 text-xs">
+                        <li key={index} className="rounded-lg bg-ink-950/60 px-3 py-2 text-xs">
                           <div className="font-mono text-slate-400">{error.locator}</div>
                           <div className="text-slate-300">{error.reason}</div>
                           {error.excerpt && (

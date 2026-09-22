@@ -78,7 +78,7 @@ export function CasesPage() {
               <input
                 value={version}
                 onChange={(event) => setVersion(event.target.value)}
-                className="w-16 rounded-md border border-white/10 bg-navy-900/80 px-2 py-1 font-mono text-xs"
+                className="w-16 rounded-md border border-white/10 bg-ink-900/80 px-2 py-1 font-mono text-xs"
                 aria-label="Case version"
               />
             </label>
@@ -97,7 +97,7 @@ export function CasesPage() {
             {labeledRuns.data?.length
               ? 'Every labeled run already has a case.'
               : 'No labeled runs yet — label some on the Labeler screen first.'}{' '}
-            <Link to="/label" className="text-emerald-300 underline decoration-dotted">
+            <Link to="/label" className="text-cyan-300 underline decoration-dotted">
               Go to the labeler
             </Link>
           </p>
@@ -127,7 +127,7 @@ export function CasesPage() {
                     type="button"
                     onClick={() => createFromRun.mutate(run.run_id)}
                     disabled={createFromRun.isPending}
-                    className="shrink-0 rounded-lg border border-emerald-500/50 bg-emerald-500/20 px-3 py-1.5 text-xs font-semibold text-emerald-200 disabled:opacity-50"
+                    className="shrink-0 rounded-lg border border-cyan-500/50 bg-cyan-500/20 px-3 py-1.5 text-xs font-semibold text-cyan-200 disabled:opacity-50"
                   >
                     Build case
                   </button>
@@ -157,7 +157,7 @@ export function CasesPage() {
               actions={
                 <Link
                   to="/export"
-                  className="rounded-lg border border-emerald-500/50 bg-emerald-500/20 px-3 py-1.5 text-sm font-semibold text-emerald-200"
+                  className="rounded-lg border border-cyan-500/50 bg-cyan-500/20 px-3 py-1.5 text-sm font-semibold text-cyan-200"
                 >
                   Export {groupVersion}
                 </Link>
@@ -228,7 +228,7 @@ function CaseRow({ item, editing, onEdit, onDelete, onSaved }: CaseRowProps) {
             {item.run_id ? (
               <Link
                 to={`/label/${encodeURIComponent(item.run_id)}`}
-                className="font-mono text-[0.7rem] text-emerald-300/80 underline decoration-dotted"
+                className="font-mono text-[0.7rem] text-cyan-300/80 underline decoration-dotted"
               >
                 from {item.run_id.slice(0, 12)}
               </Link>
@@ -254,7 +254,7 @@ function CaseRow({ item, editing, onEdit, onDelete, onSaved }: CaseRowProps) {
               ) : (
                 item.expectations.map((expectation, index) => (
                   <li key={index} className="text-xs text-slate-400">
-                    <span className="font-mono text-emerald-300/90">{expectation.kind}</span>
+                    <span className="font-mono text-cyan-300/90">{expectation.kind}</span>
                     {expectation.tool ? ` · ${expectation.tool}` : ''}
                     {expectation.pattern ? ` · /${expectation.pattern}/` : ''}
                     {expectation.sources ? ` · ${expectation.sources.join(', ')}` : ''}
@@ -288,7 +288,7 @@ function CaseRow({ item, editing, onEdit, onDelete, onSaved }: CaseRowProps) {
       </div>
 
       {editing && (
-        <div className="mt-3 animate-fade-in space-y-3 rounded-xl border border-white/10 bg-navy-950/50 p-3">
+        <div className="mt-3 animate-fade-in space-y-3 rounded-xl border border-white/10 bg-ink-950/50 p-3">
           <div>
             <label
               htmlFor={`case-input-${item.id}`}
@@ -301,7 +301,7 @@ function CaseRow({ item, editing, onEdit, onDelete, onSaved }: CaseRowProps) {
               value={input}
               onChange={(event) => setInput(event.target.value)}
               rows={3}
-              className="w-full rounded-lg border border-white/10 bg-navy-950/70 px-3 py-2 text-sm text-slate-200"
+              className="w-full rounded-lg border border-white/10 bg-ink-950/70 px-3 py-2 text-sm text-slate-200"
             />
           </div>
 
@@ -335,7 +335,7 @@ function CaseRow({ item, editing, onEdit, onDelete, onSaved }: CaseRowProps) {
                   key={index}
                   className="flex flex-wrap items-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] px-2.5 py-2"
                 >
-                  <span className="font-mono text-xs text-emerald-300">{expectation.kind}</span>
+                  <span className="font-mono text-xs text-cyan-300">{expectation.kind}</span>
 
                   {expectation.kind === 'must_call_tool' && (
                     <input
@@ -343,7 +343,7 @@ function CaseRow({ item, editing, onEdit, onDelete, onSaved }: CaseRowProps) {
                       onChange={(event) => update(index, { tool: event.target.value })}
                       placeholder="get_invoice"
                       aria-label="Tool name"
-                      className="flex-1 rounded border border-white/10 bg-navy-950/70 px-2 py-1 font-mono text-xs"
+                      className="flex-1 rounded border border-white/10 bg-ink-950/70 px-2 py-1 font-mono text-xs"
                     />
                   )}
 
@@ -353,7 +353,7 @@ function CaseRow({ item, editing, onEdit, onDelete, onSaved }: CaseRowProps) {
                       onChange={(event) => update(index, { pattern: event.target.value })}
                       placeholder="\\bINV-\\d+\\b"
                       aria-label="Regular expression"
-                      className="flex-1 rounded border border-white/10 bg-navy-950/70 px-2 py-1 font-mono text-xs"
+                      className="flex-1 rounded border border-white/10 bg-ink-950/70 px-2 py-1 font-mono text-xs"
                     />
                   )}
 
@@ -367,7 +367,7 @@ function CaseRow({ item, editing, onEdit, onDelete, onSaved }: CaseRowProps) {
                           update(index, { min_count: Number(event.target.value) })
                         }
                         aria-label="Minimum citations"
-                        className="w-16 rounded border border-white/10 bg-navy-950/70 px-2 py-1 text-xs"
+                        className="w-16 rounded border border-white/10 bg-ink-950/70 px-2 py-1 text-xs"
                       />
                       <input
                         value={(expectation.sources ?? []).join(', ')}
@@ -381,7 +381,7 @@ function CaseRow({ item, editing, onEdit, onDelete, onSaved }: CaseRowProps) {
                         }
                         placeholder="required ids, e.g. INV-2026-0881"
                         aria-label="Required sources"
-                        className="flex-1 rounded border border-white/10 bg-navy-950/70 px-2 py-1 font-mono text-xs"
+                        className="flex-1 rounded border border-white/10 bg-ink-950/70 px-2 py-1 font-mono text-xs"
                       />
                     </>
                   )}
@@ -399,7 +399,7 @@ function CaseRow({ item, editing, onEdit, onDelete, onSaved }: CaseRowProps) {
                       }}
                       rows={2}
                       aria-label="JSON Schema"
-                      className="flex-1 rounded border border-white/10 bg-navy-950/70 px-2 py-1 font-mono text-xs"
+                      className="flex-1 rounded border border-white/10 bg-ink-950/70 px-2 py-1 font-mono text-xs"
                     />
                   )}
 
@@ -425,7 +425,7 @@ function CaseRow({ item, editing, onEdit, onDelete, onSaved }: CaseRowProps) {
               type="button"
               onClick={() => save.mutate()}
               disabled={save.isPending}
-              className="rounded-lg border border-emerald-500/50 bg-emerald-500/20 px-3 py-1.5 text-sm font-semibold text-emerald-200 disabled:opacity-50"
+              className="rounded-lg border border-cyan-500/50 bg-cyan-500/20 px-3 py-1.5 text-sm font-semibold text-cyan-200 disabled:opacity-50"
             >
               {save.isPending ? 'Saving…' : 'Save case'}
             </button>
