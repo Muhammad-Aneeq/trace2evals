@@ -27,6 +27,10 @@ npm-debug.log*
 # exports produced by ad-hoc runs (evals/ artifacts ARE committed)
 exports/
 
+# demo recording: kept next to the project for convenience, deliberately untracked.
+# The .mp4 alone is ~8MB and would bloat every clone for no benefit to the code.
+demo/
+
 # os / editor
 .DS_Store
 Thumbs.db
